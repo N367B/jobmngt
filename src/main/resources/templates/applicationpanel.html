@@ -1,0 +1,49 @@
+<div th:replace="~{/includes/head :: fhead}"> </div>
+
+<div th:replace="~{/includes/header :: fheader}"> </div>
+
+	<!-- <div class="row justify-content-center"> -->
+		<div id="central_div" >
+			<h1>Applications management panel</h1>
+		
+			<div class="widget_bar">
+				<div class="widget col-xs-12 col-sm-6 col-md-4 col-lg-3" >
+					<div class="widget_title col-12">
+						<p>List of applications</p>
+					</div>
+					<div class="widget_button col-12">
+						<a href="listapplications">
+							<img  th:src="@{/img/list.png}" alt="List of applications submitted"/>
+						</a>
+					</div>
+					<div class="widget_info col-12">
+						<p>	
+							<!-- <span th:if="${nb_applications}">
+    							<span th:if="${nb_applications} > 1">applications</span>
+	    						<span th:if="${nb_applications} < 2">application</span>
+		    					registered
+                            </span> -->
+						</p>
+					</div>
+				</div><!-- end widget 1-->
+				<!-- <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 widget">
+					<div class="widget_title col-12">
+						<p>Apply</p>
+					</div>
+					<div class="widget_button col-12">
+						<a href="addapplication">
+							<img  th:src="@{/img/addL.png}" alt="Reference a new company"/>
+						</a>
+					</div>
+					<div class="widget_info col-12"></div>
+				</div>-->
+                <!-- end widget 2 -->
+			</div>			
+		</div>
+			
+	<!-- </div> -->
+
+
+<div th:replace="~{/includes/footer :: ffooter}"> </div>
+
+

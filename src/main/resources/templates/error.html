@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace ="~{/baseTemplate/base :: layout(~{::title},~{::article})}"> 
+<title>GetYourJob</title>
+<article class="row justify-content-center text-danger">
+	<header class="col-2">
+		<h1>Erreur</h1>
+	</header>
+			<p  class="col" th:text="${errormessage}"></p>
+</article>
+</html>

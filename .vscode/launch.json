@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-JobmngtApplication<jobmngt>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "fr.atlantique.imt.inf211.jobmngt.JobmngtApplication",
+            "projectName": "jobmngt",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

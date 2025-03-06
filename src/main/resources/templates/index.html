@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/baseTemplate/base :: layout(~{::title},~{::section})}">
+<title>GetYourJob</title>
+<section class="px-4 py-5" id="custom-cards">
+	<header>
+		<h1 class="pb-2 border-bottom">GetYourJob</h1>
+	</header>
+
+	<div class="row row-cols-1 row-cols-lg-3 align-items-stretch g-4 py-5">
+		<article class="col">
+			<a th:href="@{/companies}"
+				class="nav-link card card-cover h-100 overflow-hidden text-white bg-dark rounded-5 shadow-lg"
+				style="background-image: url('/img/companies.jpg'); background-size: cover;">
+				<div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+					<h2 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">Companies</h2>
+					<ul class="d-flex list-unstyled mt-auto bg-dark p-2 ">
+						<li class="me-auto">
+							<i class="bi bi-buildings " style="font-size: 2rem; color: white;"></i>
+						</li>
+						<li class="d-flex align-items-center m-2">							
+							<small th:text="${countCompanies}"></small>&nbsp;
+							<small th:text="${countCompanies} > 1? 'companies':'company'"></small>
+							<small>&nbsp;registered</small>
+						</li>
+					</ul>
+				</div>
+			</a>
+		</article>
+
+		<article class="col">
+			<a th:href="@{/candidates}"
+				class="nav-link card card-cover h-100 overflow-hidden text-white bg-dark rounded-5 shadow-lg"
+				style="background-image: url('/img/candidates.jpg'); background-size: cover;">
+				<div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+					<h2 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">Candidates</h2>
+					<ul class="d-flex list-unstyled mt-auto bg-dark p-2 ">
+						<li class="me-auto">
+							<i class="bi bi-file-person" style="font-size: 2rem; color: white;"></i>
+						</li>
+						<li class="d-flex align-items-center m-2">							
+							<small th:text="${countCandidates}"></small>&nbsp;
+							<small th:text="${countCandidates} > 1? 'candidates': 'candidate'"></small>
+							<small>&nbsp;registered</small>
+						</li>
+					</ul>
+				</div>
+			</a>
+		</article>
+	</div>
+
+</section>
+
+</html>

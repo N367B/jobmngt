@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="article(subcontent)"
+    th:replace="~{/baseTemplate/base :: layout(~{::title},~{::section})}">
+<title>Companies</title>
+<section>
+    <header>
+        <h1>Companies Management</h1>
+    </header>
+    <th:block th:insert="${subcontent}">
+    </th:block>
+</section>
+
+</html>

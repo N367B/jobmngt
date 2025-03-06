@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/company/companyBase :: article(~{::article})}">
+<article>
+    <p th:if="${#lists.size(companieslist)} == 0">No company registered yet.</p>
+    <table class="table table-striped" th:if="${#lists.size(companieslist)} > 0">
+        <caption>List of companies (<span th:text="${companieslist.size}"></span>)</caption>
+        <thead>
+            <tr>
+                <th scope="col">Denomination</th>
+                <th scope="col">Description</th>
+                <th scope="col">City</th>
+                <th scope="col">Nb. of offers</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="comp : ${companieslist}">
+                 <td th:text="${comp.denomination}" />
+                <td th:text="${comp.description}" />
+                <td th:text="${comp.city}" />
+                <td th:text="${comp.joboffers.size()}" />
+                <td>
+                    <a th:href="@{companies/}+${comp.id}" alt="Company details" title="view details" class="btn btn-large btn-secondary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a th:href="@{companies/{companyId}/edit(companyId=${comp.id})}" class="btn btn-large btn-success" alt="Edit" title="edit company">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a th:href="@{companies/{companyId}/delete(companyId=${comp.id})}" class="btn btn-large btn-danger delBtn"
+                        alt="Delete" title="delete company " data-id="@{companies/{companyId}/delete(companyId=${comp.id})}" th:attrappend="title=${' ' + comp.denomination}">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <footer>
+        <a th:href="@{companies/create}" class="btn btn-large btn-primary" title="add new company">
+            <i class="bi bi-plus"></i>
+        </a>
+
+    </footer>
+</article>
+
+</html>

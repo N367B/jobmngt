@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/baseTemplate/base :: layout(~{::title},~{::section})}">
+<title>Qualification Level</title>
+<section>
+    <header>
+        <h1>List of qualification levels</h1>
+    </header>
+    <article>
+        <!-- <a href="javascript:history.back()"><img th:src="@{/img/back.png}" alt="Back"/></a> -->
+        <p th:if="${#lists.size(qualificationlevellist)} == 0">No qualification level defined yet.</p>
+        <th:block th:if="${#lists.size(qualificationlevellist)} > 0">
+            <table class="table table-striped">
+                <caption>List of qualification levels</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="ql : ${qualificationlevellist}">
+                        <th scope="row" th:text="${ql.id}" />
+                        <td th:text="${ql.label}" />
+                        <!-- <td th:if="${#ctx.session.uid} != null AND ${#ctx.session.logintype} == 'adm'" class="nav-item active">
+                                <a th:href="@{/deletequalificationlevel/{id}(id=${ql.id})}">
+                                    <img th:src="@{img/minus.png}" alt="Delete this sector" class="minilogo"/>
+                                </a>
+                            </td> -->
+                    </tr>
+                </tbody>
+            </table>
+        </th:block>
+        <!-- <div th:if="${#ctx.session.uid} != null AND ${#ctx.session.logintype} == 'adm'" class="row h-10">
+                    <form action="/addqualificationlevel" method="get" class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
+                            <label for="labelql">Label</label>
+                            <input type="text" id="labelql" name="labelql" autofocus="autofocus" minlength="3" required/> <br />
+                        
+                            <input type="submit" value="Add" />
+                        </form>
+                    </form>
+                </div> -->
+    </article>
+</section>
+
+</html>

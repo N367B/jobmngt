@@ -1,0 +1,86 @@
+:root {
+    --green-imt: rgb(179, 199, 71);
+    --blue-imt: rgb(0, 183, 211);
+    --dark-blue-imt: rgb(0, 32, 65);
+}
+
+#header_div{
+    color: white;
+    background-color: rgb(179, 199, 71);
+}
+
+#tiny_text{
+    color: white;
+    font-size: 6px;
+}
+
+#menu_div{
+    background-color: lightgrey;
+}
+
+#content_div{
+    background-color: white;
+   
+}
+#central_div{
+    padding: 10px;
+    margin: 0 auto;
+}
+
+#footer_div {
+    clear: both;
+    color: white;
+    background-color: rgb(0, 32, 65);
+}
+
+.logo{
+    width:30px;
+}
+
+.minilogo{
+    width:15px;
+}
+
+#central_div{
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+
+.widget_bar{
+    margin: 0 auto;
+}
+
+.widget{
+    float:left;
+    margin:5px;
+    border-radius: 25px;
+    border: 2px solid rgb(179, 199, 71);
+    height: 200px;
+    width: 200px;
+}
+
+.widget_title{ 
+    text-align: center;
+    color:rgb(0, 32, 65);
+    font-size: 14px;
+    font-weight: bolder;
+    height:20%;
+}
+
+
+.widget_button{
+    height:70%;
+    margin:0 auto;
+}
+.widget_button img{
+    height: 90%;
+}
+
+.widget_info{
+    color: grey;
+    font-size: 10px;
+    height:10%;
+    text-align: left;
+    padding-left: 5px;
+}

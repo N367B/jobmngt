@@ -1,0 +1,65 @@
+//header.html
+<div th:fragment="fheader">
+    <div id="header_div" class="row h-10">
+        <div class="col-2 align-self-start">
+            <img th:src="@{/img/logo_imt.png}" />
+        </div>
+        <div class="col-6 align-self-center"></div>
+        <div class="col-2 align-self-end">
+            <p th:if="${#ctx.session.uid} != null">
+                <i class="bi bi-" style="font-size: 2rem; color: white;" th:title="${#ctx.session.usertype}"
+                    th:attrappend="class=${#ctx.session.usertype=='company'?'buildings':'person'}"></i>
+                <span th:text="${#ctx.session.user.mail}" class="tiny_text" />
+            </p>
+        </div>
+
+        <div class="col-2 align-self-end">
+            <th:block th:if="${#ctx.session.uid} != null">
+                <a th:if="${#ctx.session.hasMessages == true}" th:href="@{/messages}" title="access to your message"><i
+                        class="bi bi-envelope-at" style="font-size: 2rem; color: white;"></i></a>
+                <a href="/logout" title="logout from the webapp"><i class="bi bi-box-arrow-in-up"
+                        style="font-size: 2rem; color: white;"></i></a>
+            </th:block>
+            <a th:if="${#ctx.session.uid} == null" title="Click to login" href="/login">
+                <i class="bi bi-box-arrow-in-down" style="font-size: 2rem; color: white;"
+                    title="login to access your data"></i>
+            </a>
+        </div>
+
+    </div>
+    <nav class="navbar navbar-expand-md navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Home</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/companies}">Companies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Candidates </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Applications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/qualificationLevels}">Qualification levels</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/sectors}">Sectors</a>
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+
+</div>

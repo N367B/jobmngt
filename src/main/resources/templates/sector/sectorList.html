@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/baseTemplate/base :: layout(~{::title},~{::section})}">
+<title>Sectors</title>
+<section>
+    <header>
+        <h1>List of sectors</h1>
+    </header>
+    <article>
+        <p th:if="${#lists.size(sectorlist)} == 0">No sector defined yet.</p>
+
+        <th:block th:if="${#lists.size(sectorlist)} > 0">
+
+            <table class="table table-striped">
+                <caption>List of sectors</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sec : ${sectorlist}">
+                        <th scope="row" th:text="${sec.id}" />
+                        <td th:text="${sec.label}" />
+                        <td th:if="${#ctx.session.uid} != null AND ${#ctx.session.logintype} == 'adm'"
+                            class="nav-item active">
+                            <a th:href="@{/deletesector/{id}(id=${sec.id})}">
+                                <img th:src="@{img/minus.png}" alt="Delete this sector" class="minilogo" />
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </th:block>
+
+        <aside th:if="${#ctx.session.uid} != null AND ${#ctx.session.logintype} == 'adm'" class="row h-10">
+            <form action="/addsector" method="get" class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
+                <fieldset>
+                    <label for="labelsector">Label</label>
+                    <input type="text" id="labelsector" name="labelsector" autofocus="autofocus" minlength="3"
+                        required />
+                </fieldset>
+                <input type="submit" value="Add" />
+            </form>
+        </aside>
+    </article>
+</section>
+
+</html>

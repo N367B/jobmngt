@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/company/companyBase :: article(~{::article})}">
+<article>
+    <header>
+        <h2>Company details</h2>
+    </header>
+    <form>
+        <fieldset class="mb-3">
+            <label for="nameid" class="form-label">Name</label>:
+            <input type="text" id="nameid" class="form-control" name="denomination" autofocus="autofocus"
+                th:value="${company.denomination}" readonly />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="descid" class="form-label">Description</label>:
+            <input type="text" id="descid" class="form-control" name="description" th:value="${company.description}"
+                readonly />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="cityid" class="form-label">City</label>:
+            <input type="text" id="cityid" class="form-control" name="city" th:value="${company.city}" readonly />
+        </fieldset>
+    </form>
+
+    <aside th:if="${#lists.size(company.joboffers)} > 0">
+        <h2>List of associated job offers</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Task</th>
+                    <th scope="col">Publication date</th>
+                    <th scope="col">Qualification level</th>
+                    <th scope="col">Sectors</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="job : ${company.joboffers}">
+                    <th scope="row" th:text="${job.id}" />
+                    <td th:text="${job.title}" />
+                    <td th:text="${job.taskdescription}" />
+                    <td th:text="${job.publicationdate}" />
+                    <td th:text="${job.qualificationlevel.label}" />
+                    <td><span th:each="sec : ${job.sectors}"><span th:text="${sec.label}"></span> </span></td>
+                </tr>
+            </tbody>
+        </table>
+    </aside>
+
+
+    <footer>
+        <a th:href="@{/companies/{companyId}/edit(companyId=${company.id})}" class="btn btn-large btn-primary"
+            title="Unlock to update"><i class="bi bi-pencil"></i></a>
+        <a th:href="@{/companies}" class="btn btn-secondary" title="go back"><i class="bi bi-list-columns"></i></a>
+        </footer>
+</article>
+
+</html>
