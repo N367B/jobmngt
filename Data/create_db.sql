@@ -1,145 +1,216 @@
--- Suppress tables if they exist
-drop table if exists candidatureSecteur;
-drop table if exists emploiSecteur;
-drop table if exists candidature;
-drop table if exists offreEmploi;
-drop table if exists messageCandidature;
-drop table if exists messageOffre;
-drop table if exists candidate;
-drop table if exists entreprise;
-drop table if exists appuser;
-drop table if exists qualificationlevel;
-drop table if exists sector;
+-- =================================================================================
+-- Title :             jobmngt_db_creation.sql
+-- Description :       Script de création des tables pour l'application Job Management
+-- Auteur :            BODIN Noé
+-- Date de création :  2025-03-06
+-- =================================================================================
 
--- Tables creation
-create table sector
-(
-  idSecteur     serial primary key,
-  labelSecteur  varchar(50) not null unique
+-- =========================
+-- 1) Suppression si existe
+-- =========================
+
+DROP TABLE IF EXISTS candidatureSecteur;
+DROP TABLE IF EXISTS emploiSecteur;
+DROP TABLE IF EXISTS messageCandidature;
+DROP TABLE IF EXISTS messageOffre;
+DROP TABLE IF EXISTS candidature;
+DROP TABLE IF EXISTS offreEmploi;
+DROP TABLE IF EXISTS candidat;
+DROP TABLE IF EXISTS entreprise;
+DROP TABLE IF EXISTS appuser;
+DROP TABLE IF EXISTS qualificationlevel;
+DROP TABLE IF EXISTS sector;
+DROP TABLE IF EXISTS company;
+
+-- =========================
+-- 2) Création des tables
+-- =========================
+
+-- Table des secteurs d'activité
+CREATE TABLE sector (
+    idSecteur       SERIAL PRIMARY KEY,
+    labelSecteur    VARCHAR(50) NOT NULL UNIQUE
 );
 
-create table qualificationlevel
-(
-  idQualification     serial primary key,
-  labelQualification  varchar(50) not null unique
+-- Table des niveaux de qualification
+CREATE TABLE qualificationlevel (
+    idQualification     SERIAL PRIMARY KEY,
+    labelQualification  VARCHAR(50) NOT NULL UNIQUE
 );
 
-create table appuser
-(
-  idUser          serial primary key,
-  mail            varchar(50) not null unique,
-  password        varchar(50) not null check (length(password) >= 4),
-  usertype        varchar(50) check (usertype in ('company', 'candidate')),
-  city           varchar(50)
+-- Table des utilisateurs génériques
+CREATE TABLE appuser (
+    idUser      SERIAL PRIMARY KEY,
+    mail        VARCHAR(50) NOT NULL UNIQUE,
+    password    VARCHAR(50) NOT NULL CHECK (LENGTH(password) >= 4),
+    usertype    VARCHAR(10) CHECK (usertype IN ('entreprise', 'candidat')),
+    city        VARCHAR(50)
 );
 
-create table entreprise
-(
-  idEntreprise    integer primary key references appuser(idUser) not null,
-  mail            varchar(50) not null unique references appuser(mail),
-  denomination    text,
-  description     text
+-- Contrôle du format de l'email
+ALTER TABLE appuser 
+    ADD CONSTRAINT mailformat 
+    CHECK (mail ~* '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
+
+-- Table entreprise
+CREATE TABLE entreprise (
+    idEntreprise    INTEGER PRIMARY KEY REFERENCES appuser(idUser) ON DELETE CASCADE,
+    denomination    VARCHAR(100) NOT NULL,
+    description     TEXT
 );
 
-create table candidate
-(
-  idCandidate     integer primary key references appuser(idUser) not null,
-  mail            varchar(50) not null unique references appuser(mail),
-  firstname       varchar(50) not null,
-  lastname        varchar(50) not null
+-- Table candidat
+CREATE TABLE candidat (
+    idCandidat      INTEGER PRIMARY KEY REFERENCES appuser(idUser) ON DELETE CASCADE,
+    firstname       VARCHAR(50) NOT NULL,
+    lastname        VARCHAR(50) NOT NULL
 );
 
-create table offreEmploi
-(
-  idOffreEmploi     serial primary key,
-  title           varchar(50) not null,
-  taskDescription text not null,
-  publicationDate date not null,
-  idLabelQualification integer references qualificationlevel(idQualification) not null,
-  mail          integer references appuser(idUser) not null
+-- Table des offres d'emploi
+CREATE TABLE offreEmploi (
+    idOffreEmploi       SERIAL PRIMARY KEY,
+    title               VARCHAR(100) NOT NULL,
+    taskDescription     TEXT NOT NULL,
+    publicationDate     DATE NOT NULL DEFAULT CURRENT_DATE,
+    -- Référence au niveau de qualification (1..1)
+    idQualification     INTEGER NOT NULL REFERENCES qualificationlevel(idQualification),
+    -- Entreprise propriétaire (1..N)
+    idEntreprise        INTEGER NOT NULL REFERENCES entreprise(idEntreprise) ON DELETE CASCADE
 );
 
-
-
-
-create table candidature 
-(
-  idCandidature   serial primary key,
-  CV              text not null,
-  appdat          date not null,
-  labelQualification integer references qualificationlevel(idQualification) not null,
-  mail          integer references appuser(idUser) not null
+-- Table des candidatures
+CREATE TABLE candidature (
+    idCandidature       SERIAL PRIMARY KEY,
+    cv                  TEXT NOT NULL,
+    appDate             DATE NOT NULL DEFAULT CURRENT_DATE,
+    -- Référence au niveau de qualification (1..1)
+    idQualification     INTEGER NOT NULL REFERENCES qualificationlevel(idQualification),
+    -- Candidat propriétaire (1..N)
+    idCandidat          INTEGER NOT NULL REFERENCES candidat(idCandidat) ON DELETE CASCADE
 );
 
-create table messageOffre
-(
-  idMessageOffre  serial primary key,
-  message        text not null,
-  publicationDate date not null,
-  idOffreEmploi integer references offreEmploi(idOffreEmploi) not null,
-  idCandidature integer references candidature(idCandidature) not null
+-- Table de messages liés à une offre
+CREATE TABLE messageOffre (
+    idMessageOffre      SERIAL PRIMARY KEY,
+    message             TEXT NOT NULL,
+    publicationDate     DATE NOT NULL DEFAULT CURRENT_DATE,
+    -- L'offre concernée
+    idOffreEmploi       INTEGER NOT NULL REFERENCES offreEmploi(idOffreEmploi) ON DELETE CASCADE,
+    -- La candidature concernée (si on souhaite lier à une candidature précise)
+    idCandidature       INTEGER REFERENCES candidature(idCandidature) ON DELETE CASCADE
 );
 
-create table messageCandidature
-(
-  idMessageCandidature  serial primary key,
-  message        text not null,
-  publicationDate date not null,
-  idCandidature integer references candidature(idCandidature) not null,
-  idOffreEmploi integer references offreEmploi(idOffreEmploi) not null
+-- Table de messages liés à une candidature
+CREATE TABLE messageCandidature (
+    idMessageCandidature   SERIAL PRIMARY KEY,
+    message                TEXT NOT NULL,
+    publicationDate        DATE NOT NULL DEFAULT CURRENT_DATE,
+    -- La candidature concernée
+    idCandidature          INTEGER NOT NULL REFERENCES candidature(idCandidature) ON DELETE CASCADE,
+    -- L'offre concernée (si on souhaite lier à une offre précise)
+    idOffreEmploi          INTEGER REFERENCES offreEmploi(idOffreEmploi) ON DELETE CASCADE
 );
 
-create table indexEmploiSecteur
-(
-  labelSecteur  integer references sector(idSecteur) not null,
-  idOffreEmploi integer references offreEmploi(idOffreEmploi) not null,
-  primary key(labelSecteur, idOffreEmploi) 
+-- Table d'association entre offreEmploi et sector (relation N..N)
+CREATE TABLE emploiSecteur (
+    idOffreEmploi   INTEGER NOT NULL REFERENCES offreEmploi(idOffreEmploi) ON DELETE CASCADE,
+    idSecteur       INTEGER NOT NULL REFERENCES sector(idSecteur) ON DELETE CASCADE,
+    PRIMARY KEY (idOffreEmploi, idSecteur)
 );
 
-create table indexCandidatureSecteur
-(
-  labelSecteur  integer references sector(idSecteur) not null,
-  idCandidature integer references candidature(idCandidature) not null,
-  primary key(labelSecteur, idCandidature) 
+-- Table d'association entre candidature et sector (relation N..N)
+CREATE TABLE candidatureSecteur (
+    idCandidature   INTEGER NOT NULL REFERENCES candidature(idCandidature) ON DELETE CASCADE,
+    idSecteur       INTEGER NOT NULL REFERENCES sector(idSecteur) ON DELETE CASCADE,
+    PRIMARY KEY (idCandidature, idSecteur)
 );
 
-alter table appuser add constraint mailformat check (mail ~* '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
+-- =========================
+-- 3) Insertion de données
+-- =========================
 
--- Insert some data
--- Some users to test the login form
-insert into appuser(mail, password, usertype) values ('g.a@imt.fr', '1234', 'candidate');
-insert into appuser(mail, password, usertype) values ('ceo@google.fr', 'abcd','company');
+-- Quelques enregistrements de test pour appuser
+INSERT INTO appuser(mail, password, usertype, city)
+VALUES
+    ('ceo@google.fr', 'abcd', 'entreprise', 'Brest'),
+    ('john.doe@imt.fr', 'pass1', 'candidat', 'Nantes'),
+    ('jane.smith@imt.fr', 'pass2', 'candidat', 'Rennes');
 
--- Some sectors
-insert into sector(labelSecteur) values ('Purchase/Logistic');                  --  1
-insert into sector(labelSecteur) values ('Administration');             --  2
-insert into sector(labelSecteur) values ('Agriculture');                        --  3
-insert into sector(labelSecteur) values ('Agrofood');                    --  4
-insert into sector(labelSecteur) values ('Insurance');                          --  5
-insert into sector(labelSecteur) values ('Audit/Advise/Expertise');           --  6
-insert into sector(labelSecteur) values ('Public works/Real estate');                     --  7
-insert into sector(labelSecteur) values ('Trade');                         --  8
-insert into sector(labelSecteur) values ('Communication/Art/Media/Fashion');       --  9
-insert into sector(labelSecteur) values ('Accounting');                       -- 10
-insert into sector(labelSecteur) values ('Direction/Execution');       -- 11
-insert into sector(labelSecteur) values ('Distribution/Sale');              -- 12
-insert into sector(labelSecteur) values ('Electronic/Microelectronic');     -- 13
-insert into sector(labelSecteur) values ('Environment');                      -- 14
-insert into sector(labelSecteur) values ('Finance/Bank');                     -- 15
-insert into sector(labelSecteur) values ('Training/Teaching');             -- 16
-insert into sector(labelSecteur) values ('Hotel/Restaurant/Tourism');   -- 17
-insert into sector(labelSecteur) values ('Industry/Engineering/Production');    -- 18
-insert into sector(labelSecteur) values ('Computer science');                       -- 19
-insert into sector(labelSecteur) values ('Juridique/Fiscal/Droit');             -- 20
-insert into sector(labelSecteur) values ('Marketing');                          -- 21
-insert into sector(labelSecteur) values ('Public/Parapublic');                  -- 22
-insert into sector(labelSecteur) values ('Human resources');                -- 23
-insert into sector(labelSecteur) values ('Health/Social/Biology/HHumanitarian');  -- 24
-insert into sector(labelSecteur) values ('Telecom/Networking');                    -- 25
+-- Entreprise associée à l'usertype 'entreprise'
+INSERT INTO entreprise(idEntreprise, denomination, description)
+SELECT idUser, 'Google', 'Développement de logiciels'
+FROM appuser
+WHERE mail = 'ceo@google.fr';
 
--- Some qualification levels
-insert into qualificationlevel(labelQualification) values ('Professional level');   --  1
-insert into qualificationlevel(labelQualification) values ('A-diploma');       --  2
-insert into qualificationlevel(labelQualification) values ('Licence');     --  3
-insert into qualificationlevel(labelQualification) values ('Master');     --  4
-insert into qualificationlevel(labelQualification) values ('PhD');  --  5
+-- Candidats
+INSERT INTO candidat(idCandidat, firstname, lastname)
+SELECT idUser, 'John', 'Doe'
+FROM appuser
+WHERE mail = 'john.doe@imt.fr';
+
+INSERT INTO candidat(idCandidat, firstname, lastname)
+SELECT idUser, 'Jane', 'Smith'
+FROM appuser
+WHERE mail = 'jane.smith@imt.fr';
+
+-- Secteurs
+INSERT INTO sector(labelSecteur) VALUES
+('Computer science'),
+('Marketing'),
+('Finance/Bank'),
+('Administration');
+
+-- Niveaux de qualification
+INSERT INTO qualificationlevel(labelQualification) VALUES
+('Professional level'),
+('A-diploma'),
+('Licence'),
+('Master'),
+('PhD');
+
+-- Exemple d'offre d'emploi
+INSERT INTO offreEmploi(title, taskDescription, idQualification, idEntreprise)
+VALUES 
+('Chef de projet IT', 'Gestion de projets informatiques', 1, (SELECT idEntreprise FROM entreprise WHERE idEntreprise = (SELECT idUser FROM appuser WHERE mail = 'ceo@google.fr')));
+
+-- Exemple de candidature
+INSERT INTO candidature(cv, idQualification, idCandidat)
+VALUES
+('cv_john_doe.pdf', 2, (SELECT idCandidat FROM candidat WHERE idCandidat = (SELECT idUser FROM appuser WHERE mail = 'john.doe@imt.fr')));
+
+-- Association offre-secteur
+INSERT INTO emploiSecteur(idOffreEmploi, idSecteur)
+VALUES
+(
+  (SELECT idOffreEmploi FROM offreEmploi WHERE title = 'Chef de projet IT'),
+  (SELECT idSecteur FROM sector WHERE labelSecteur = 'Computer science')
+);
+
+-- Association candidature-secteur
+INSERT INTO candidatureSecteur(idCandidature, idSecteur)
+VALUES
+(
+  (SELECT idCandidature FROM candidature WHERE cv = 'cv_john_doe.pdf'),
+  (SELECT idSecteur FROM sector WHERE labelSecteur = 'Computer science')
+);
+
+-- Exemple de messageOffre
+INSERT INTO messageOffre(message, idOffreEmploi, idCandidature)
+VALUES
+(
+  'Une nouvelle offre pouvant vous intéresser...', 
+  (SELECT idOffreEmploi FROM offreEmploi WHERE title = 'Chef de projet IT'),
+  (SELECT idCandidature FROM candidature WHERE cv = 'cv_john_doe.pdf')
+);
+
+-- Exemple de messageCandidature
+INSERT INTO messageCandidature(message, idCandidature, idOffreEmploi)
+VALUES
+(
+  'Ma candidature pourrait correspondre à votre offre...', 
+  (SELECT idCandidature FROM candidature WHERE cv = 'cv_john_doe.pdf'),
+  (SELECT idOffreEmploi FROM offreEmploi WHERE title = 'Chef de projet IT')
+);
+
+-- Fin du script
+COMMIT;
