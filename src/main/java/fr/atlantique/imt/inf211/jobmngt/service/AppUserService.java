@@ -1,9 +1,9 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
-import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import java.util.List;
 import java.util.Optional;
 
+import fr.atlantique.imt.inf211.jobmngt.entity.*;;
 public interface AppUserService {
 
     public List<AppUser> listOfUsers();

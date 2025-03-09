@@ -47,14 +47,14 @@ public class LoginController {
         Optional<AppUser> user = userAppService.checkLogin(appUser);
         if (user.isPresent()) {
             appUser = user.get();
-            System.out.println("User found uid: " + appUser.getId());
+            System.out.println("User found uid: " + appUser.getIdUser());
             session.setAttribute("user", appUser);
-            if (appUser.getUsertype().equals("candidate"))
+            if (appUser.getUserType().equals("candidate"))
                 session.setAttribute("usertype", "candidate");
             else
                 session.setAttribute("usertype", "company");
 
-            session.setAttribute("uid", appUser.getId());
+            session.setAttribute("uid", appUser.getIdUser());
             return new ModelAndView("redirect:/");
         } else {
             ModelAndView mav = new ModelAndView("login");

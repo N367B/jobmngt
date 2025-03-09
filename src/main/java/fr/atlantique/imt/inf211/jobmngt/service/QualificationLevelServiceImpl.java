@@ -1,8 +1,7 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
-import fr.atlantique.imt.inf211.jobmngt.dao.QualificationLevelDao;
-import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
-
+import fr.atlantique.imt.inf211.jobmngt.entity.*;
+import fr.atlantique.imt.inf211.jobmngt.dao.*;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
