@@ -18,23 +18,23 @@ import jakarta.persistence.UniqueConstraint;
        uniqueConstraints = @UniqueConstraint(columnNames = "labelqualification"))
 public class QualificationLevel implements java.io.Serializable {
 
-    private int idqualification;
-    private String labelqualification;
-    private Set<OffreEmploi> offreemplois = new HashSet<OffreEmploi>(0);
+    private int idQualification;
+    private String labelQualification;
+    private Set<OffreEmploi> offreEmplois = new HashSet<OffreEmploi>(0);
     private Set<Candidature> candidatures = new HashSet<Candidature>(0);
 
     public QualificationLevel() {
     }
 
-    public QualificationLevel(int idqualification, String labelqualification) {
-        this.idqualification = idqualification;
-        this.labelqualification = labelqualification;
+    public QualificationLevel(int idQualification, String labelQualification) {
+        this.idQualification = idQualification;
+        this.labelQualification = labelQualification;
     }
     
-    public QualificationLevel(int idqualification, String labelqualification, Set<OffreEmploi> offreemplois, Set<Candidature> candidatures) {
-       this.idqualification = idqualification;
-       this.labelqualification = labelqualification;
-       this.offreemplois = offreemplois;
+    public QualificationLevel(int idQualification, String labelQualification, Set<OffreEmploi> offreEmplois, Set<Candidature> candidatures) {
+       this.idQualification = idQualification;
+       this.labelQualification = labelQualification;
+       this.offreEmplois = offreEmplois;
        this.candidatures = candidatures;
     }
    
@@ -42,30 +42,30 @@ public class QualificationLevel implements java.io.Serializable {
     @SequenceGenerator(name = "QUALIFICATIONLEVEL_ID_GENERATOR", sequenceName = "QUALIFICATIONLEVEL_ID_SEQ", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "QUALIFICATIONLEVEL_ID_GENERATOR")
     @Column(name = "idqualification", unique = true, nullable = false)
-    public int getIdqualification() {
-        return this.idqualification;
+    public int getIdQualification() {
+        return this.idQualification;
     }
     
-    public void setIdqualification(int idqualification) {
-        this.idqualification = idqualification;
+    public void setIdQualification(int idQualification) {
+        this.idQualification = idQualification;
     }
 
     @Column(name = "labelqualification", unique = true, nullable = false, length = 50)
-    public String getLabelqualification() {
-        return this.labelqualification;
+    public String getLabelQualification() {
+        return this.labelQualification;
     }
     
-    public void setLabelqualification(String labelqualification) {
-        this.labelqualification = labelqualification;
+    public void setLabelQualification(String labelQualification) {
+        this.labelQualification = labelQualification;
     }
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "qualificationLevel")
-    public Set<OffreEmploi> getOffreemplois() {
-        return this.offreemplois;
+    public Set<OffreEmploi> getOffreEmplois() {
+        return this.offreEmplois;
     }
     
-    public void setOffreemplois(Set<OffreEmploi> offreemplois) {
-        this.offreemplois = offreemplois;
+    public void setOffreEmplois(Set<OffreEmploi> offreEmplois) {
+        this.offreEmplois = offreEmplois;
     }
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "qualificationLevel")

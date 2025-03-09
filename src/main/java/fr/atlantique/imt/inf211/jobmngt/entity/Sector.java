@@ -16,53 +16,54 @@ import jakarta.persistence.UniqueConstraint;
 @Table(name = "sector", schema = "public", uniqueConstraints = @UniqueConstraint(columnNames = "labelsecteur"))
 public class Sector implements java.io.Serializable {
 
-    private int idsecteur;
-    private String labelsecteur;
-    private Set<OffreEmploi> offreemplois = new HashSet<OffreEmploi>(0);
+    private int idSecteur;
+    private String labelSecteur;
+    private Set<OffreEmploi> offreEmplois = new HashSet<OffreEmploi>(0);
     private Set<Candidature> candidatures = new HashSet<Candidature>(0);
 
     public Sector() {
     }
 
-    public Sector(int idsecteur, String labelsecteur) {
-        this.idsecteur = idsecteur;
-        this.labelsecteur = labelsecteur;
+    public Sector(int idSecteur, String labelSecteur) {
+        this.idSecteur = idSecteur;
+        this.labelSecteur = labelSecteur;
     }
 
-    public Sector(int idsecteur, String labelsecteur, Set<OffreEmploi> offreemplois, Set<Candidature> candidatures) {
-       this.idsecteur = idsecteur;
-       this.labelsecteur = labelsecteur;
-       this.offreemplois = offreemplois;
+    public Sector(int idSecteur, String labelSecteur, Set<OffreEmploi> offreEmplois, Set<Candidature> candidatures) {
+       this.idSecteur = idSecteur;
+       this.labelSecteur = labelSecteur;
+       this.offreEmplois = offreEmplois;
        this.candidatures = candidatures;
     }
    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idsecteur", unique = true, nullable = false)
-    public int getIdsecteur() {
-        return this.idsecteur;
-    }
-    
-    public void setIdsecteur(int idsecteur) {
-        this.idsecteur = idsecteur;
+    public int getIdSecteur() {
+        return this.idSecteur;
     }
 
+    public void setIdSecteur(int idSecteur) {
+        this.idSecteur = idSecteur;
+    }
+
+
     @Column(name = "labelsecteur", unique = true, nullable = false, length = 50)
-    public String getLabelsecteur() {
-        return this.labelsecteur;
+    public String getLabelSecteur() {
+        return this.labelSecteur;
     }
     
-    public void setLabelsecteur(String labelsecteur) {
-        this.labelsecteur = labelsecteur;
+    public void setLabelSecteur(String labelSecteur) {
+        this.labelSecteur = labelSecteur;
     }
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "sectors")
-    public Set<OffreEmploi> getOffreemplois() {
-        return this.offreemplois;
+    public Set<OffreEmploi> getOffreEmplois() {
+        return this.offreEmplois;
     }
     
-    public void setOffreemplois(Set<OffreEmploi> offreemplois) {
-        this.offreemplois = offreemplois;
+    public void setOffreEmplois(Set<OffreEmploi> offreEmplois) {
+        this.offreEmplois = offreEmplois;
     }
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "sectors")

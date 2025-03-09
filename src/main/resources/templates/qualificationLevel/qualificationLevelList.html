@@ -19,8 +19,8 @@
                 </thead>
                 <tbody>
                     <tr th:each="ql : ${qualificationlevellist}">
-                        <th scope="row" th:text="${ql.id}" />
-                        <td th:text="${ql.label}" />
+                        <th scope="row" th:text="${ql.idQualification}" />
+                        <td th:text="${ql.labelQualification}" />
                         <!-- <td th:if="${#ctx.session.uid} != null AND ${#ctx.session.logintype} == 'adm'" class="nav-item active">
                                 <a th:href="@{/deletequalificationlevel/{id}(id=${ql.id})}">
                                     <img th:src="@{img/minus.png}" alt="Delete this sector" class="minilogo"/>

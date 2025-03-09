@@ -20,11 +20,11 @@
                 </thead>
                 <tbody>
                     <tr th:each="sec : ${sectorlist}">
-                        <th scope="row" th:text="${sec.id}" />
-                        <td th:text="${sec.label}" />
+                        <th scope="row" th:text="${sec.idSecteur}" />
+                        <td th:text="${sec.labelSecteur}" />
                         <td th:if="${#ctx.session.uid} != null AND ${#ctx.session.logintype} == 'adm'"
                             class="nav-item active">
-                            <a th:href="@{/deletesector/{id}(id=${sec.id})}">
+                            <a th:href="@{/deletesector/{id}(id=${sec.idSecteur})}">
                                 <img th:src="@{img/minus.png}" alt="Delete this sector" class="minilogo" />
                             </a>
                         </td>
