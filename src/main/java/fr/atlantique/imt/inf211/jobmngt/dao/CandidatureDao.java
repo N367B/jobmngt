@@ -3,6 +3,7 @@ package fr.atlantique.imt.inf211.jobmngt.dao;
 // Generated 9 mars 2025, 15:48:50 by Hibernate Tools 5.6.15.Final
 
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
@@ -62,7 +63,7 @@ public class CandidatureDao {
         }
     }
     
-    @Transactional
+    @Transactional(readOnly = true)
     public Candidature findById( int id) {
         logger.log(Level.INFO, "getting Candidature instance with id: " + id);
         try {
@@ -75,5 +76,37 @@ public class CandidatureDao {
             throw re;
         }
     }
-}
 
+    @Transactional(readOnly = true)
+    public List<Candidature> findBySectorAndQualificationLevel(Sector sector, QualificationLevel qualificationLevel) {
+        logger.log(Level.INFO, "getting Candidature instance with sector: " + sector + " and qualification level: " + qualificationLevel);
+        try {
+            List<Candidature> instances = entityManager.createQuery("SELECT c FROM Candidature c JOIN c.sectors s WHERE s = :sector AND c.qualificationLevel = :qualificationLevel", Candidature.class)
+            .setParameter("sector", sector)
+            .setParameter("qualificationLevel", qualificationLevel)
+            .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Candidature> findAll() {
+        logger.log(Level.INFO, "getting all Candidature instances");
+        try {
+            List<Candidature> instances = entityManager.createQuery("select c from Candidature c", Candidature.class).getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+
+}

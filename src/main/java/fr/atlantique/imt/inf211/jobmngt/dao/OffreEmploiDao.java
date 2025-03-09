@@ -3,6 +3,7 @@ package fr.atlantique.imt.inf211.jobmngt.dao;
 // Generated 9 mars 2025, 15:48:50 by Hibernate Tools 5.6.15.Final
 
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
@@ -69,6 +70,53 @@ public class OffreEmploiDao {
             OffreEmploi instance = entityManager.find(OffreEmploi.class, id);
             logger.log(Level.INFO, "get successful");
             return instance;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<OffreEmploi> findAll() {
+        logger.log(Level.INFO, "getting all Offreemploi instances");
+        try {
+            List<OffreEmploi> instances = entityManager.createQuery("select o from OffreEmploi o", OffreEmploi.class).getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<OffreEmploi> findByEntreprise(Entreprise entreprise) {
+        logger.log(Level.INFO, "getting OffreEmploi instance with entreprise: " + entreprise);
+        try {
+            List<OffreEmploi> instances = entityManager.createQuery("SELECT o FROM OffreEmploi o WHERE o.entreprise = :entreprise", OffreEmploi.class)
+                .setParameter("entreprise", entreprise)
+                .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<OffreEmploi> findBySectorAndQualificationLevel(Sector sector, QualificationLevel qualificationLevel) {
+        logger.log(Level.INFO, "getting OffreEmploi instance with sector: " + sector + " and qualification level: " + qualificationLevel);
+        try {
+            List<OffreEmploi> instances = entityManager.createQuery("SELECT o FROM OffreEmploi o WHERE :sector MEMBER OF o.sectors AND o.qualificationLevel = :qualificationLevel", OffreEmploi.class)
+                .setParameter("sector", sector)
+                .setParameter("qualificationLevel", qualificationLevel)
+                .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
         }
         catch (RuntimeException re) {
             logger.log(Level.SEVERE, "get failed", re);

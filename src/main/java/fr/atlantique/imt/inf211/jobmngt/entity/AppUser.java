@@ -1,5 +1,8 @@
 package fr.atlantique.imt.inf211.jobmngt.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +16,9 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class,
+  property = "idUser")
 @Entity
 @Table(name = "appuser", schema = "public", uniqueConstraints = @UniqueConstraint(columnNames = "mail"))
 public class AppUser implements java.io.Serializable {
@@ -25,10 +31,21 @@ public class AppUser implements java.io.Serializable {
     private Candidat candidat;
     private Entreprise entreprise;
 
+
     public AppUser() {
     }
 
-    public AppUser(int idUser, String mail, String password, String userType, String city, Candidat candidat, Entreprise entreprise) {
+    public AppUser(int idUser, String mail, String password, String userType, String city) {
+        this.idUser = idUser;
+        this.mail = mail;
+        this.password = password;
+        this.userType = userType;
+        this.city = city;
+    }
+
+    public AppUser(int idUser, String mail, String password, String userType, String city
+    , Candidat candidat, Entreprise entreprise
+    ) {
         this.idUser = idUser;
         this.mail = mail;
         this.password = password;
@@ -86,6 +103,7 @@ public class AppUser implements java.io.Serializable {
         this.city = city;
     }
 
+    
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "appUser")
     public Candidat getCandidat() {
         return this.candidat;
@@ -104,7 +122,7 @@ public class AppUser implements java.io.Serializable {
         this.entreprise = entreprise;
     }
 
-    @PrePersist
+    /*     @PrePersist
     @PreUpdate
     private void validateUserRole() {
         boolean isCandidateSet = this.candidat != null;
@@ -112,5 +130,6 @@ public class AppUser implements java.io.Serializable {
         if ((isCandidateSet && isEntrepriseSet) || (!isCandidateSet && !isEntrepriseSet)) {
             throw new RuntimeException("An AppUser must be either a candidate or an enterprise, but not both or neither.");
         }
-    }
+    }*/
+
 }

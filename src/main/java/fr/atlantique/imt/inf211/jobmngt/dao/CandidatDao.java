@@ -3,6 +3,7 @@ package fr.atlantique.imt.inf211.jobmngt.dao;
 // Generated 9 mars 2025, 15:48:50 by Hibernate Tools 5.6.15.Final
 
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
@@ -70,6 +71,20 @@ public class CandidatDao {
             Candidat instance = entityManager.find(Candidat.class, id);
             logger.log(Level.INFO, "get successful");
             return instance;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Candidat> findAll() {
+        logger.log(Level.INFO, "getting all Candidat instances");
+        try {
+            List<Candidat> instances = entityManager.createQuery("select c from Candidat c", Candidat.class).getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
         }
         catch (RuntimeException re) {
             logger.log(Level.SEVERE, "get failed", re);

@@ -86,5 +86,19 @@ public class QualificationLevelDao {
     public List<QualificationLevel> findAll(String orderField, String order) {
         return entityManager.createQuery("SELECT q FROM QualificationLevel q ORDER BY q." + orderField + " " + order, QualificationLevel.class).getResultList();
     }
+
+    @Transactional(readOnly = true)
+    public List<QualificationLevel> findAll() {
+        return entityManager.createQuery("SELECT q FROM QualificationLevel q", QualificationLevel.class).getResultList();
+    }
+
+    @Transactional(readOnly = true)
+    public QualificationLevel findByLabel(String label) {
+        return entityManager.createQuery("SELECT q FROM QualificationLevel q WHERE q.label = :label", QualificationLevel.class)
+            .setParameter("label", label)
+            .getSingleResult();
+    }
+
+
 }
 

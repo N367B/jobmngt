@@ -108,5 +108,21 @@ public class SectorDao {
             throw re;
         }
     }
+
+    @Transactional(readOnly = true)
+    public Sector findByLabel(String labelSecteur) {
+        logger.log(Level.INFO, "getting Sector instance with labelSecteur: " + labelSecteur);
+        try {
+            Sector instance = entityManager.createQuery("SELECT s FROM Sector s WHERE s.labelSecteur = :labelSecteur", Sector.class)
+                .setParameter("labelSecteur", labelSecteur)
+                .getSingleResult();
+            logger.log(Level.INFO, "get successful");
+            return instance;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
 }
 
