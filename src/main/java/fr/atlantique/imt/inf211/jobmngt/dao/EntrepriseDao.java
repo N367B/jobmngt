@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
 import org.hibernate.query.Query;
@@ -138,6 +139,24 @@ public class EntrepriseDao {
             return entreprise;
         } catch (RuntimeException re) {
             logger.log(Level.SEVERE, "Échec de la persistance de l'Entreprise", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Entreprise findByUserMail(String mail) {
+        logger.log(Level.INFO, "getting Entreprise instance with AppUser mail: " + mail);
+        try {
+            return entityManager.createQuery(
+                    "SELECT e FROM Entreprise e JOIN e.appUser u WHERE u.mail = :mail", 
+                    Entreprise.class)
+                    .setParameter("mail", mail)
+                    .getSingleResult();
+        } catch (NoResultException nre) {
+            logger.log(Level.INFO, "No enterprise found with user mail: " + mail);
+            return null;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "findByUserMail failed", re);
             throw re;
         }
     }

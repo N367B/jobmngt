@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,17 +111,15 @@ public class SectorDao {
     }
 
     @Transactional(readOnly = true)
-    public Sector findByLabel(String labelSecteur) {
-        logger.log(Level.INFO, "getting Sector instance with labelSecteur: " + labelSecteur);
+    public Sector findByLabel(String label) {
         try {
-            Sector instance = entityManager.createQuery("SELECT s FROM Sector s WHERE s.labelSecteur = :labelSecteur", Sector.class)
-                .setParameter("labelSecteur", labelSecteur)
-                .getSingleResult();
-            logger.log(Level.INFO, "get successful");
-            return instance;
-        }
-        catch (RuntimeException re) {
-            logger.log(Level.SEVERE, "get failed", re);
+            return entityManager.createQuery("SELECT s FROM Sector s WHERE s.labelSecteur = :label", Sector.class)
+                    .setParameter("label", label)
+                    .getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "findByLabel failed", re);
             throw re;
         }
     }

@@ -95,6 +95,7 @@ public class TestOffreEmploiDaoController {
      * @param offre L'offre d'emploi à créer
      * @return L'offre d'emploi créée avec son ID
      */
+    /* 
     @PostMapping
     public ResponseEntity<OffreEmploi> createOffre(@RequestBody OffreEmploi offre) {
         try {
@@ -103,9 +104,107 @@ public class TestOffreEmploiDaoController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-    
-    /**
+    }*/
+    @PostMapping
+    public ResponseEntity<OffreEmploi> createOffre(@RequestBody OffreEmploi offre) {
+        try {
+            // 1. Gestion de l'entreprise (par ID ou email)
+            Entreprise entreprise = null;
+            if (offre.getEntreprise() != null) {
+                // Recherche par ID
+                if (offre.getEntreprise().getIdEntreprise() > 0) {
+                    entreprise = entrepriseDao.findById(offre.getEntreprise().getIdEntreprise());
+                } 
+                // Recherche par mail de l'utilisateur
+                else if (offre.getEntreprise().getAppUser() != null && 
+                         offre.getEntreprise().getAppUser().getMail() != null && 
+                         !offre.getEntreprise().getAppUser().getMail().isEmpty()) {
+                    entreprise = entrepriseDao.findByUserMail(offre.getEntreprise().getAppUser().getMail());
+                }
+            }
+            
+            if (entreprise == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            offre.setEntreprise(entreprise);
+            
+            // 2. Gestion du niveau de qualification (par ID ou label)
+            QualificationLevel qualificationLevel = null;
+            if (offre.getQualificationLevel() != null) {
+                // Recherche par ID
+                if (offre.getQualificationLevel().getIdQualification() > 0) {
+                    qualificationLevel = qualificationLevelDao.findById(offre.getQualificationLevel().getIdQualification());
+                } 
+                // Recherche ou création par label
+                else if (offre.getQualificationLevel().getLabelQualification() != null && 
+                        !offre.getQualificationLevel().getLabelQualification().isEmpty()) {
+                    qualificationLevel = qualificationLevelDao.findByLabel(offre.getQualificationLevel().getLabelQualification());
+                    
+                    // Création si le niveau de qualification n'existe pas
+                    if (qualificationLevel == null) {
+                        QualificationLevel newQualLevel = new QualificationLevel();
+                        newQualLevel.setLabelQualification(offre.getQualificationLevel().getLabelQualification());
+                        qualificationLevelDao.persist(newQualLevel);
+                        qualificationLevel = newQualLevel;
+                        System.out.println("Nouveau niveau de qualification créé: " + 
+                                newQualLevel.getLabelQualification() + " avec ID: " + newQualLevel.getIdQualification());
+                    }
+                }
+            }
+            
+            if (qualificationLevel == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            offre.setQualificationLevel(qualificationLevel);
+            
+            // 3. Gestion des secteurs (par ID ou label) - code existant amélioré
+            if (offre.getSectors() != null && !offre.getSectors().isEmpty()) {
+                Set<Sector> detachedSectors = new HashSet<>(offre.getSectors());
+                Set<Sector> managedSectors = new HashSet<>();
+                
+                for (Sector sector : detachedSectors) {
+                    Sector managedSector = null;
+                    
+                    // Recherche par ID
+                    if (sector.getIdSecteur() > 0) {
+                        managedSector = sectorDao.findById(sector.getIdSecteur());
+                    } 
+                    // Recherche ou création par label
+                    else if (sector.getLabelSecteur() != null && !sector.getLabelSecteur().isEmpty()) {
+                        managedSector = sectorDao.findByLabel(sector.getLabelSecteur());
+                        
+                        // Création si le secteur n'existe pas
+                        if (managedSector == null) {
+                            Sector newSector = new Sector();
+                            newSector.setLabelSecteur(sector.getLabelSecteur());
+                            sectorDao.persist(newSector);
+                            managedSector = newSector;
+                            System.out.println("Nouveau secteur créé: " + 
+                                    newSector.getLabelSecteur() + " avec ID: " + newSector.getIdSecteur());
+                        }
+                    }
+                    
+                    if (managedSector != null) {
+                        managedSectors.add(managedSector);
+                    }
+                }
+                
+                offre.setSectors(managedSectors);
+            }
+            
+            // 4. Définir la date si non fournie
+            if (offre.getPublicationDate() == null) {
+                offre.setPublicationDate(new Date());
+            }
+            
+            // 5. Persister l'offre
+            offreEmploiDao.persist(offre);
+            return ResponseEntity.status(HttpStatus.CREATED).body(offre);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }    /**
      * Met à jour une offre d'emploi existante
      * @param id Identifiant de l'offre à modifier
      * @param offreDetails Nouvelles informations de l'offre

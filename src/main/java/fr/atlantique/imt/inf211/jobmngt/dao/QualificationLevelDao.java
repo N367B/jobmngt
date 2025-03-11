@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import fr.atlantique.imt.inf211.jobmngt.entity.*;
@@ -94,9 +95,20 @@ public class QualificationLevelDao {
 
     @Transactional(readOnly = true)
     public QualificationLevel findByLabel(String label) {
-        return entityManager.createQuery("SELECT q FROM QualificationLevel q WHERE q.label = :label", QualificationLevel.class)
-            .setParameter("label", label)
-            .getSingleResult();
+        logger.log(Level.INFO, "getting QualificationLevel instance with label: " + label);
+        try {
+            return entityManager.createQuery(
+                    "SELECT q FROM QualificationLevel q WHERE LOWER(q.labelQualification) = LOWER(:label)", 
+                    QualificationLevel.class)
+                    .setParameter("label", label)
+                    .getSingleResult();
+        } catch (NoResultException nre) {
+            logger.log(Level.INFO, "No qualification level found with label: " + label);
+            return null;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "findByLabel failed", re);
+            throw re;
+        }
     }
 
 
