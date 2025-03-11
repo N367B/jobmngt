@@ -109,5 +109,37 @@ public class EntrepriseDao {
             throw re;
         }
     }
+
+    @Transactional
+    public Entreprise persistWithUser(Entreprise entreprise) {
+        logger.log(Level.INFO, "Persisting Entreprise with its AppUser");
+        try {
+            // 1. Vérifier si l'AppUser existe déjà et a un ID
+            AppUser appUser = entreprise.getAppUser();
+            if (appUser == null) {
+                throw new RuntimeException("L'entreprise doit avoir un utilisateur associé");
+            }
+            
+            if (appUser.getIdUser() == 0) {
+                throw new RuntimeException("L'utilisateur doit être persisté avant l'entreprise");
+            }
+            
+            // 2. Définir explicitement l'ID de l'entreprise comme étant l'ID de l'utilisateur
+            entreprise.setIdEntreprise(appUser.getIdUser());
+            
+            // 3. Persister l'entreprise avec persist (pas merge)
+            entityManager.persist(entreprise);
+            
+            // 4. Mettre à jour la référence bidirectionnelle
+            appUser.setEntreprise(entreprise);
+            entityManager.merge(appUser);
+            
+            logger.log(Level.INFO, "Entreprise persistée avec succès");
+            return entreprise;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "Échec de la persistance de l'Entreprise", re);
+            throw re;
+        }
+    }
 }
 

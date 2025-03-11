@@ -54,7 +54,7 @@ public class Entreprise  implements java.io.Serializable {
        this.offreEmplois = offreEmplois;
     }
    
-    @GenericGenerator(name="EntrepriseIdGenerator", strategy="foreign", parameters=@Parameter(name="property", value="appuser"))
+    @GenericGenerator(name="EntrepriseIdGenerator", strategy="foreign", parameters=@Parameter(name="property", value="appUser"))
     @Id
     @GeneratedValue(generator="EntrepriseIdGenerator")
     @Column(name="identreprise", unique=true, nullable=false)

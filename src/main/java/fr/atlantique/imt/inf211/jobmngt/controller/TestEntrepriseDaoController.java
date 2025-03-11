@@ -108,48 +108,52 @@ public class TestEntrepriseDaoController {
         }
     }
     
-@PostMapping("/test")
-public ResponseEntity<Entreprise> createTestEntreprise() {
-    try {
-        // Recherche d'un utilisateur existant
-        Optional<AppUser> userOpt = appUserDao.findByMail("admin@example.com");
-        if (userOpt.isPresent()) {
-            System.out.println("User found: " + userOpt.get().getMail());
-            // Supprimer l'utilisateur existant
-            AppUser user = userOpt.get();
-            // Supprimer l'entreprise et l'utilisateur dans DAO
-            if (user.getEntreprise() != null) {
-                System.out.println("Removing entreprise: " + user.getEntreprise().getDenomination());
-                entrepriseDao.remove(user.getEntreprise());
+    @PostMapping("/test")
+    public ResponseEntity<Entreprise> createTestEntreprise() {
+        try {
+            // Recherche d'un utilisateur existant
+            Optional<AppUser> userOpt = appUserDao.findByMail("admin@example.com");
+            if (userOpt.isPresent()) {
+                System.out.println("User found: " + userOpt.get().getMail());
+                // Supprimer l'utilisateur existant
+                AppUser user = userOpt.get();
+                // Supprimer d'abord l'entreprise si elle existe
+                if (user.getEntreprise() != null) {
+                    System.out.println("Removing entreprise: " + user.getEntreprise().getDenomination());
+                    entrepriseDao.remove(user.getEntreprise());
+                }
+                System.out.println("Removing user: " + user.getMail());
+                appUserDao.remove(user);
             }
-            System.out.println("Removing user: " + user.getMail());
-            appUserDao.remove(user);
+            
+            // Créer d'abord un utilisateur
+            AppUser newUser = new AppUser();
+            newUser.setMail("admin@example.com");
+            newUser.setPassword("password123");
+            newUser.setCity("Brest");
+            newUser.setUserType("entreprise");
+            
+            // Persister l'utilisateur
+            appUserDao.persist(newUser);
+            
+            // Créer l'entreprise associée
+            Entreprise newEntreprise = new Entreprise();
+            newEntreprise.setAppUser(newUser);
+            newEntreprise.setDenomination("Entreprise Test");
+            newEntreprise.setDescription("Description de test pour l'entreprise");
+            
+            // Utiliser directement la méthode standard qui fonctionne maintenant
+            entrepriseDao.persist(newEntreprise);
+            
+            // Mettre à jour la relation bidirectionnelle
+            newUser.setEntreprise(newEntreprise);
+            appUserDao.merge(newUser);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(newEntreprise);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        // Créer d'abord un utilisateur SANS entreprise
-        AppUser newUser = new AppUser();
-        newUser.setMail("admin@example.com");
-        newUser.setPassword("password123");
-        newUser.setCity("Brest");
-        newUser.setUserType("entreprise");
-        
-        // Persister l'utilisateur sans référence circulaire
-        appUserDao.persist(newUser);
-        
-        // Puis créer et persister l'entreprise
-        Entreprise newEntreprise = new Entreprise(newUser, "Entreprise Test");
-        newEntreprise.setDescription("Description de test pour l'entreprise");
-        entrepriseDao.persist(newEntreprise);
-        
-        // Enfin mettre à jour l'utilisateur avec l'entreprise
-        newUser.setEntreprise(newEntreprise);
-        appUserDao.merge(newUser);
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(newEntreprise);
-        
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-}
 
 }

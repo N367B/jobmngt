@@ -55,7 +55,7 @@ public class Candidat  implements java.io.Serializable {
        this.candidatures = candidatures;
     }
    
-    @GenericGenerator(name="CandidatIdGenerator", strategy="foreign", parameters=@Parameter(name="property", value="appuser"))
+    @GenericGenerator(name="CandidatIdGenerator", strategy="foreign", parameters=@Parameter(name="property", value="appUser"))
     @Id
     @GeneratedValue(generator="CandidatIdGenerator")
     @Column(name="idcandidat", unique=true, nullable=false)
