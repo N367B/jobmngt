@@ -117,8 +117,8 @@ public class TestOffreEmploiDaoController {
                 } 
                 // Recherche par mail de l'utilisateur
                 else if (offre.getEntreprise().getAppUser() != null && 
-                         offre.getEntreprise().getAppUser().getMail() != null && 
-                         !offre.getEntreprise().getAppUser().getMail().isEmpty()) {
+                    offre.getEntreprise().getAppUser().getMail() != null && 
+                    !offre.getEntreprise().getAppUser().getMail().isEmpty()) {
                     entreprise = entrepriseDao.findByUserMail(offre.getEntreprise().getAppUser().getMail());
                 }
             }
@@ -147,7 +147,7 @@ public class TestOffreEmploiDaoController {
                         qualificationLevelDao.persist(newQualLevel);
                         qualificationLevel = newQualLevel;
                         System.out.println("Nouveau niveau de qualification créé: " + 
-                                newQualLevel.getLabelQualification() + " avec ID: " + newQualLevel.getIdQualification());
+                        newQualLevel.getLabelQualification() + " avec ID: " + newQualLevel.getIdQualification());
                     }
                 }
             }
@@ -157,7 +157,7 @@ public class TestOffreEmploiDaoController {
             }
             offre.setQualificationLevel(qualificationLevel);
             
-            // 3. Gestion des secteurs (par ID ou label) - code existant amélioré
+            // 3. Gestion des secteurs (par ID ou label)
             if (offre.getSectors() != null && !offre.getSectors().isEmpty()) {
                 Set<Sector> detachedSectors = new HashSet<>(offre.getSectors());
                 Set<Sector> managedSectors = new HashSet<>();
@@ -180,7 +180,7 @@ public class TestOffreEmploiDaoController {
                             sectorDao.persist(newSector);
                             managedSector = newSector;
                             System.out.println("Nouveau secteur créé: " + 
-                                    newSector.getLabelSecteur() + " avec ID: " + newSector.getIdSecteur());
+                            newSector.getLabelSecteur() + " avec ID: " + newSector.getIdSecteur());
                         }
                     }
                     
@@ -204,7 +204,9 @@ public class TestOffreEmploiDaoController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }    /**
+    }    
+    
+    /**
      * Met à jour une offre d'emploi existante
      * @param id Identifiant de l'offre à modifier
      * @param offreDetails Nouvelles informations de l'offre

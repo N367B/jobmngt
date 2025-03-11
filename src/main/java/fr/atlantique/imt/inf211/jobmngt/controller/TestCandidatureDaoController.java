@@ -45,6 +45,7 @@ public class TestCandidatureDaoController {
             List<Candidature> candidatures = candidatureDao.findAll();
             return ResponseEntity.ok(candidatures);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -85,6 +86,7 @@ public class TestCandidatureDaoController {
             List<Candidature> candidatures = candidatureDao.findBySectorAndQualificationLevel(sector, qualificationLevel);
             return ResponseEntity.ok(candidatures);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -97,26 +99,94 @@ public class TestCandidatureDaoController {
     @PostMapping
     public ResponseEntity<Candidature> createCandidature(@RequestBody Candidature candidature) {
         try {
-            // Vérification que le candidat existe
-            Candidat candidat = candidature.getCandidat();
-            if (candidat == null || candidatDao.findById(candidat.getIdCandidat()) == null) {
-                return ResponseEntity.badRequest().body(null);
+            // 1. Gestion du candidat
+            Candidat candidat = null;
+            if (candidature.getCandidat() != null) {
+                // Recherche par ID
+                if (candidature.getCandidat().getIdCandidat() > 0) {
+                    candidat = candidatDao.findById(candidature.getCandidat().getIdCandidat());
+                }
             }
             
-            // Vérification que le niveau de qualification existe
-            QualificationLevel qualificationLevel = candidature.getQualificationLevel();
-            if (qualificationLevel == null || qualificationLevelDao.findById(qualificationLevel.getIdQualification()) == null) {
+            if (candidat == null) {
                 return ResponseEntity.badRequest().body(null);
             }
+            candidature.setCandidat(candidat);
             
-            // Définition de la date de candidature si non fournie
+            // 2. Gestion du niveau de qualification
+            QualificationLevel qualificationLevel = null;
+            if (candidature.getQualificationLevel() != null) {
+                // Recherche par ID
+                if (candidature.getQualificationLevel().getIdQualification() > 0) {
+                    qualificationLevel = qualificationLevelDao.findById(candidature.getQualificationLevel().getIdQualification());
+                } 
+                // Recherche ou création par label
+                else if (candidature.getQualificationLevel().getLabelQualification() != null && 
+                       !candidature.getQualificationLevel().getLabelQualification().isEmpty()) {
+                    qualificationLevel = qualificationLevelDao.findByLabel(candidature.getQualificationLevel().getLabelQualification());
+                    
+                    // Création si le niveau n'existe pas
+                    if (qualificationLevel == null) {
+                        QualificationLevel newQualLevel = new QualificationLevel();
+                        newQualLevel.setLabelQualification(candidature.getQualificationLevel().getLabelQualification());
+                        qualificationLevelDao.persist(newQualLevel);
+                        qualificationLevel = newQualLevel;
+                        System.out.println("Nouveau niveau de qualification créé: " + 
+                        newQualLevel.getLabelQualification() + " avec ID: " + newQualLevel.getIdQualification());
+                    }
+                }
+            }
+            
+            if (qualificationLevel == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            candidature.setQualificationLevel(qualificationLevel);
+            
+            // 3. Gestion des secteurs
+            if (candidature.getSectors() != null && !candidature.getSectors().isEmpty()) {
+                Set<Sector> detachedSectors = new HashSet<>(candidature.getSectors());
+                Set<Sector> managedSectors = new HashSet<>();
+                
+                for (Sector sector : detachedSectors) {
+                    Sector managedSector = null;
+                    
+                    // Recherche par ID
+                    if (sector.getIdSecteur() > 0) {
+                        managedSector = sectorDao.findById(sector.getIdSecteur());
+                    } 
+                    // Recherche ou création par label
+                    else if (sector.getLabelSecteur() != null && !sector.getLabelSecteur().isEmpty()) {
+                        managedSector = sectorDao.findByLabel(sector.getLabelSecteur());
+                        
+                        // Création si le secteur n'existe pas
+                        if (managedSector == null) {
+                            Sector newSector = new Sector();
+                            newSector.setLabelSecteur(sector.getLabelSecteur());
+                            sectorDao.persist(newSector);
+                            managedSector = newSector;
+                            System.out.println("Nouveau secteur créé: " + 
+                            newSector.getLabelSecteur() + " avec ID: " + newSector.getIdSecteur());
+                        }
+                    }
+                    
+                    if (managedSector != null) {
+                        managedSectors.add(managedSector);
+                    }
+                }
+                
+                candidature.setSectors(managedSectors);
+            }
+            
+            // 4. Définir la date si non fournie
             if (candidature.getAppDate() == null) {
                 candidature.setAppDate(new Date());
             }
             
+            // 5. Persister la candidature
             candidatureDao.persist(candidature);
             return ResponseEntity.status(HttpStatus.CREATED).body(candidature);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -131,15 +201,68 @@ public class TestCandidatureDaoController {
     public ResponseEntity<Candidature> updateCandidature(@PathVariable int id, @RequestBody Candidature candidatureDetails) {
         Candidature candidature = candidatureDao.findById(id);
         if (candidature != null) {
-            // Mise à jour des champs
-            if (candidatureDetails.getQualificationLevel() != null) {
-                candidature.setQualificationLevel(candidatureDetails.getQualificationLevel());
+            // Mise à jour du candidat
+            if (candidatureDetails.getCandidat() != null && candidatureDetails.getCandidat().getIdCandidat() > 0) {
+                Candidat candidat = candidatDao.findById(candidatureDetails.getCandidat().getIdCandidat());
+                if (candidat != null) {
+                    candidature.setCandidat(candidat);
+                }
             }
+            
+            // Mise à jour du niveau de qualification
+            if (candidatureDetails.getQualificationLevel() != null) {
+                if (candidatureDetails.getQualificationLevel().getIdQualification() > 0) {
+                    QualificationLevel qualificationLevel = qualificationLevelDao.findById(
+                        candidatureDetails.getQualificationLevel().getIdQualification());
+                    if (qualificationLevel != null) {
+                        candidature.setQualificationLevel(qualificationLevel);
+                    }
+                } else if (candidatureDetails.getQualificationLevel().getLabelQualification() != null) {
+                    QualificationLevel qualificationLevel = qualificationLevelDao.findByLabel(
+                        candidatureDetails.getQualificationLevel().getLabelQualification());
+                    if (qualificationLevel != null) {
+                        candidature.setQualificationLevel(qualificationLevel);
+                    }
+                }
+            }
+            
+            // Mise à jour du CV
             if (candidatureDetails.getCv() != null) {
                 candidature.setCv(candidatureDetails.getCv());
             }
+            
+            // Mise à jour de la date
+            if (candidatureDetails.getAppDate() != null) {
+                candidature.setAppDate(candidatureDetails.getAppDate());
+            }
+            
+            // Mise à jour des secteurs
             if (candidatureDetails.getSectors() != null && !candidatureDetails.getSectors().isEmpty()) {
-                candidature.setSectors(candidatureDetails.getSectors());
+                Set<Sector> detachedSectors = new HashSet<>(candidatureDetails.getSectors());
+                Set<Sector> managedSectors = new HashSet<>();
+                
+                for (Sector sector : detachedSectors) {
+                    Sector managedSector = null;
+                    
+                    if (sector.getIdSecteur() > 0) {
+                        managedSector = sectorDao.findById(sector.getIdSecteur());
+                    } else if (sector.getLabelSecteur() != null && !sector.getLabelSecteur().isEmpty()) {
+                        managedSector = sectorDao.findByLabel(sector.getLabelSecteur());
+                        
+                        if (managedSector == null) {
+                            Sector newSector = new Sector();
+                            newSector.setLabelSecteur(sector.getLabelSecteur());
+                            sectorDao.persist(newSector);
+                            managedSector = newSector;
+                        }
+                    }
+                    
+                    if (managedSector != null) {
+                        managedSectors.add(managedSector);
+                    }
+                }
+                
+                candidature.setSectors(managedSectors);
             }
             
             // Sauvegarde des modifications
@@ -190,6 +313,7 @@ public class TestCandidatureDaoController {
             candidatureDao.persist(candidature);
             return ResponseEntity.status(HttpStatus.CREATED).body(candidature);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

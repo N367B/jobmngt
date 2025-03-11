@@ -30,8 +30,6 @@ public class TestCandidatDaoController {
     @GetMapping
     public ResponseEntity<List<Candidat>> getAllCandidats() {
         try {
-            // Nous avons besoin d'implémenter la méthode findAll dans CandidatDao
-            // Pour l'instant, on peut simuler une méthode à implémenter
             List<Candidat> candidats = candidatDao.findAll();
             return ResponseEntity.ok(candidats);
         } catch (Exception e) {
@@ -62,7 +60,30 @@ public class TestCandidatDaoController {
     @PostMapping
     public ResponseEntity<Candidat> createCandidat(@RequestBody Candidat candidat) {
         try {
+            // Vérifier si l'utilisateur existe déjà
+            if (candidat.getAppUser() != null && candidat.getAppUser().getMail() != null) {
+                Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
+                if (existingUser.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(null);
+                }
+            }
+            
+            // Persister l'utilisateur si nouveau
+            if (candidat.getAppUser() != null && candidat.getAppUser().getIdUser() == 0) {
+                AppUser user = candidat.getAppUser();
+                user.setUserType("candidat");
+                appUserDao.persist(user);
+            }
+            
+            // Persister le candidat
             candidatDao.persist(candidat);
+            
+            // Mettre à jour la relation bidirectionnelle
+            AppUser user = candidat.getAppUser();
+            user.setCandidat(candidat);
+            appUserDao.merge(user);
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(candidat);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -80,11 +101,24 @@ public class TestCandidatDaoController {
         Candidat candidat = candidatDao.findById(id);
         if (candidat != null) {
             // Mise à jour des champs
-            candidat.getAppUser().setMail(candidatDetails.getAppUser().getMail());
-            candidat.getAppUser().setPassword(candidatDetails.getAppUser().getPassword());
-            candidat.getAppUser().setCity(candidatDetails.getAppUser().getCity());
-            candidat.setFirstName(candidatDetails.getFirstName());
-            candidat.setLastName(candidatDetails.getLastName());
+            if (candidatDetails.getAppUser() != null) {
+                if (candidatDetails.getAppUser().getMail() != null) {
+                    candidat.getAppUser().setMail(candidatDetails.getAppUser().getMail());
+                }
+                if (candidatDetails.getAppUser().getPassword() != null) {
+                    candidat.getAppUser().setPassword(candidatDetails.getAppUser().getPassword());
+                }
+                if (candidatDetails.getAppUser().getCity() != null) {
+                    candidat.getAppUser().setCity(candidatDetails.getAppUser().getCity());
+                }
+            }
+            
+            if (candidatDetails.getFirstName() != null) {
+                candidat.setFirstName(candidatDetails.getFirstName());
+            }
+            if (candidatDetails.getLastName() != null) {
+                candidat.setLastName(candidatDetails.getLastName());
+            }
             
             // Sauvegarde des modifications
             candidat = candidatDao.merge(candidat);
@@ -117,22 +151,47 @@ public class TestCandidatDaoController {
     @PostMapping("/test")
     public ResponseEntity<Candidat> createTestCandidat() {
         try {
+            // Recherche d'un utilisateur existant
+            Optional<AppUser> userOpt = appUserDao.findByMail("candidat@example.com");
+            if (userOpt.isPresent()) {
+                System.out.println("User found: " + userOpt.get().getMail());
+                // Supprimer l'utilisateur existant
+                AppUser user = userOpt.get();
+                // Supprimer d'abord le candidat s'il existe
+                if (user.getCandidat() != null) {
+                    System.out.println("Removing candidat: " + user.getCandidat().getFirstName() + " " + user.getCandidat().getLastName());
+                    candidatDao.remove(user.getCandidat());
+                }
+                System.out.println("Removing user: " + user.getMail());
+                appUserDao.remove(user);
+            }
+            
             // Création d'un nouvel utilisateur
-            AppUser user = new AppUser();
-            user.setMail("candidat@example.com");
-            user.setPassword("password123");
-            user.setCity("Nantes");
-            user.setUserType("candidat");
+            AppUser newUser = new AppUser();
+            newUser.setMail("candidat@example.com");
+            newUser.setPassword("password123");
+            newUser.setCity("Nantes");
+            newUser.setUserType("candidat");
             
-            // Création d'un candidat associé
-            Candidat candidat = new Candidat(user, "Jean", "Dupont");
+            // Persister l'utilisateur
+            appUserDao.persist(newUser);
             
-            // Persister l'utilisateur d'abord puis le candidat
-            appUserDao.persist(user);
-            candidatDao.persist(candidat);
+            // Créer le candidat associé
+            Candidat newCandidat = new Candidat();
+            newCandidat.setAppUser(newUser);
+            newCandidat.setFirstName("Jean");
+            newCandidat.setLastName("Dupont");
             
-            return ResponseEntity.status(HttpStatus.CREATED).body(candidat);
+            // Persister le candidat
+            candidatDao.persist(newCandidat);
+            
+            // Mettre à jour la relation bidirectionnelle
+            newUser.setCandidat(newCandidat);
+            appUserDao.merge(newUser);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(newCandidat);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
