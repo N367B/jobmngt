@@ -113,6 +113,18 @@ public ResponseEntity<Entreprise> createTestEntreprise() {
     try {
         // Recherche d'un utilisateur existant
         Optional<AppUser> userOpt = appUserDao.findByMail("admin@example.com");
+        if (userOpt.isPresent()) {
+            System.out.println("User found: " + userOpt.get().getMail());
+            // Supprimer l'utilisateur existant
+            AppUser user = userOpt.get();
+            // Supprimer l'entreprise et l'utilisateur dans DAO
+            if (user.getEntreprise() != null) {
+                System.out.println("Removing entreprise: " + user.getEntreprise().getDenomination());
+                entrepriseDao.remove(user.getEntreprise());
+            }
+            System.out.println("Removing user: " + user.getMail());
+            appUserDao.remove(user);
+        }
         // Créer d'abord un utilisateur SANS entreprise
         AppUser newUser = new AppUser();
         newUser.setMail("admin@example.com");

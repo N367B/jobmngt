@@ -55,6 +55,11 @@ public class AppUser implements java.io.Serializable {
         this.entreprise = entreprise;
     }
    
+
+    /*
+    * ID GENERATED NOT FROM DB SO CAN CAUSE SOME ISSUES (starting from 1 even though 1 already present sometimes)
+    NEED TO BE FIXED
+     */
     @Id 
     @SequenceGenerator(name = "APPUSER_ID_GENERATOR", sequenceName = "APPUSER_ID_SEQ", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "APPUSER_ID_GENERATOR")
