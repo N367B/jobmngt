@@ -3,6 +3,7 @@ package fr.atlantique.imt.inf211.jobmngt.controller;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import fr.atlantique.imt.inf211.jobmngt.dao.CandidatureDao;
+import fr.atlantique.imt.inf211.jobmngt.dao.AppUserDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.CandidatDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.QualificationLevelDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.SectorDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
+import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
@@ -34,6 +37,9 @@ public class TestCandidatureDaoController {
     
     @Autowired
     private SectorDao sectorDao;
+
+    @Autowired
+    private AppUserDao appUserDao;
     
     /**
      * Liste toutes les candidatures disponibles
@@ -67,17 +73,34 @@ public class TestCandidatureDaoController {
     
     /**
      * Recherche des candidatures par secteur et niveau de qualification
-     * @param idSecteur ID du secteur
-     * @param idQualification ID du niveau de qualification
+     * @param secteurParam ID ou label du secteur
+     * @param qualificationParam ID ou label du niveau de qualification
      * @return Liste des candidatures correspondant aux critères
      */
     @GetMapping("/search")
     public ResponseEntity<List<Candidature>> searchCandidatures(
-            @RequestParam("secteur") int idSecteur,
-            @RequestParam("qualification") int idQualification) {
+            @RequestParam("secteur") String secteurParam,
+            @RequestParam("qualification") String qualificationParam) {
         try {
-            Sector sector = sectorDao.findById(idSecteur);
-            QualificationLevel qualificationLevel = qualificationLevelDao.findById(idQualification);
+            Sector sector = null;
+            QualificationLevel qualificationLevel = null;
+            
+            // Tenter de parser comme des IDs
+            try {
+                int idSecteur = Integer.parseInt(secteurParam);
+                sector = sectorDao.findById(idSecteur);
+            } catch (NumberFormatException e) {
+                // Ce n'est pas un ID, on cherche par label
+                sector = sectorDao.findByLabel(secteurParam);
+            }
+            
+            try {
+                int idQualification = Integer.parseInt(qualificationParam);
+                qualificationLevel = qualificationLevelDao.findById(idQualification);
+            } catch (NumberFormatException e) {
+                // Ce n'est pas un ID, on cherche par label
+                qualificationLevel = qualificationLevelDao.findByLabel(qualificationParam);
+            }
             
             if (sector == null || qualificationLevel == null) {
                 return ResponseEntity.badRequest().build();
@@ -99,96 +122,115 @@ public class TestCandidatureDaoController {
     @PostMapping
     public ResponseEntity<Candidature> createCandidature(@RequestBody Candidature candidature) {
         try {
-            // 1. Gestion du candidat
-            Candidat candidat = null;
-            if (candidature.getCandidat() != null) {
-                // Recherche par ID
-                if (candidature.getCandidat().getIdCandidat() > 0) {
-                    candidat = candidatDao.findById(candidature.getCandidat().getIdCandidat());
+        // 1. Gestion du candidat
+        Candidat candidat = null;
+        if (candidature.getCandidat() != null) {
+            // Recherche par ID
+            if (candidature.getCandidat().getIdCandidat() > 0) {
+                candidat = candidatDao.findById(candidature.getCandidat().getIdCandidat());
+            } 
+            // Recherche par mail de l'utilisateur
+            else if (candidature.getCandidat().getAppUser() != null && 
+                candidature.getCandidat().getAppUser().getMail() != null && 
+                !candidature.getCandidat().getAppUser().getMail().isEmpty()) {
+                // Il faut d'abord récupérer l'AppUser correspondant au mail
+                Optional<AppUser> appUser = appUserDao.findByMail(
+                    candidature.getCandidat().getAppUser().getMail());
+                if (appUser.isPresent() && appUser.get().getCandidat() != null) {
+                    candidat = candidatDao.findById(appUser.get().getCandidat().getIdCandidat());
                 }
             }
+        }
+        
+        if (candidat == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        candidature.setCandidat(candidat);
+
+        // Gestion du CV - Si non fourni, on génère un nom automatiquement
+        if (candidature.getCv() == null || candidature.getCv().trim().isEmpty()) {
+            String firstName = candidat.getFirstName() != null ? candidat.getFirstName() : "inconnu";
+            String lastName = candidat.getLastName() != null ? candidat.getLastName() : "inconnu";
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd").format(new Date());
+            candidature.setCv("CV_" + firstName + "_" + lastName + "_" + timestamp + ".pdf");
+        }
             
-            if (candidat == null) {
-                return ResponseEntity.badRequest().body(null);
+        // 2. Gestion du niveau de qualification
+        QualificationLevel qualificationLevel = null;
+        if (candidature.getQualificationLevel() != null) {
+            // Recherche par ID
+            if (candidature.getQualificationLevel().getIdQualification() > 0) {
+                qualificationLevel = qualificationLevelDao.findById(candidature.getQualificationLevel().getIdQualification());
+            } 
+            // Recherche ou création par label
+            else if (candidature.getQualificationLevel().getLabelQualification() != null && 
+                    !candidature.getQualificationLevel().getLabelQualification().isEmpty()) {
+                qualificationLevel = qualificationLevelDao.findByLabel(candidature.getQualificationLevel().getLabelQualification());
+                
+                // Création si le niveau n'existe pas
+                if (qualificationLevel == null) {
+                    QualificationLevel newQualLevel = new QualificationLevel();
+                    newQualLevel.setLabelQualification(candidature.getQualificationLevel().getLabelQualification());
+                    qualificationLevelDao.persist(newQualLevel);
+                    qualificationLevel = newQualLevel;
+                    System.out.println("Nouveau niveau de qualification créé: " + 
+                    newQualLevel.getLabelQualification() + " avec ID: " + newQualLevel.getIdQualification());
+                }
             }
-            candidature.setCandidat(candidat);
+        }
+        
+        if (qualificationLevel == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        candidature.setQualificationLevel(qualificationLevel);
+        
+        // 3. Gestion des secteurs
+        if (candidature.getSectors() != null && !candidature.getSectors().isEmpty()) {
+            Set<Sector> detachedSectors = new HashSet<>(candidature.getSectors());
+            Set<Sector> managedSectors = new HashSet<>();
             
-            // 2. Gestion du niveau de qualification
-            QualificationLevel qualificationLevel = null;
-            if (candidature.getQualificationLevel() != null) {
+            for (Sector sector : detachedSectors) {
+                Sector managedSector = null;
+                
                 // Recherche par ID
-                if (candidature.getQualificationLevel().getIdQualification() > 0) {
-                    qualificationLevel = qualificationLevelDao.findById(candidature.getQualificationLevel().getIdQualification());
+                if (sector.getIdSecteur() > 0) {
+                    managedSector = sectorDao.findById(sector.getIdSecteur());
                 } 
                 // Recherche ou création par label
-                else if (candidature.getQualificationLevel().getLabelQualification() != null && 
-                       !candidature.getQualificationLevel().getLabelQualification().isEmpty()) {
-                    qualificationLevel = qualificationLevelDao.findByLabel(candidature.getQualificationLevel().getLabelQualification());
+                else if (sector.getLabelSecteur() != null && !sector.getLabelSecteur().isEmpty()) {
+                    managedSector = sectorDao.findByLabel(sector.getLabelSecteur());
                     
-                    // Création si le niveau n'existe pas
-                    if (qualificationLevel == null) {
-                        QualificationLevel newQualLevel = new QualificationLevel();
-                        newQualLevel.setLabelQualification(candidature.getQualificationLevel().getLabelQualification());
-                        qualificationLevelDao.persist(newQualLevel);
-                        qualificationLevel = newQualLevel;
-                        System.out.println("Nouveau niveau de qualification créé: " + 
-                        newQualLevel.getLabelQualification() + " avec ID: " + newQualLevel.getIdQualification());
-                    }
-                }
-            }
-            
-            if (qualificationLevel == null) {
-                return ResponseEntity.badRequest().body(null);
-            }
-            candidature.setQualificationLevel(qualificationLevel);
-            
-            // 3. Gestion des secteurs
-            if (candidature.getSectors() != null && !candidature.getSectors().isEmpty()) {
-                Set<Sector> detachedSectors = new HashSet<>(candidature.getSectors());
-                Set<Sector> managedSectors = new HashSet<>();
-                
-                for (Sector sector : detachedSectors) {
-                    Sector managedSector = null;
-                    
-                    // Recherche par ID
-                    if (sector.getIdSecteur() > 0) {
-                        managedSector = sectorDao.findById(sector.getIdSecteur());
-                    } 
-                    // Recherche ou création par label
-                    else if (sector.getLabelSecteur() != null && !sector.getLabelSecteur().isEmpty()) {
-                        managedSector = sectorDao.findByLabel(sector.getLabelSecteur());
-                        
-                        // Création si le secteur n'existe pas
-                        if (managedSector == null) {
-                            Sector newSector = new Sector();
-                            newSector.setLabelSecteur(sector.getLabelSecteur());
-                            sectorDao.persist(newSector);
-                            managedSector = newSector;
-                            System.out.println("Nouveau secteur créé: " + 
-                            newSector.getLabelSecteur() + " avec ID: " + newSector.getIdSecteur());
-                        }
-                    }
-                    
-                    if (managedSector != null) {
-                        managedSectors.add(managedSector);
+                    // Création si le secteur n'existe pas
+                    if (managedSector == null) {
+                        Sector newSector = new Sector();
+                        newSector.setLabelSecteur(sector.getLabelSecteur());
+                        sectorDao.persist(newSector);
+                        managedSector = newSector;
+                        System.out.println("Nouveau secteur créé: " + 
+                        newSector.getLabelSecteur() + " avec ID: " + newSector.getIdSecteur());
                     }
                 }
                 
-                candidature.setSectors(managedSectors);
+                if (managedSector != null) {
+                    managedSectors.add(managedSector);
+                }
             }
             
-            // 4. Définir la date si non fournie
-            if (candidature.getAppDate() == null) {
-                candidature.setAppDate(new Date());
-            }
-            
-            // 5. Persister la candidature
-            candidatureDao.persist(candidature);
-            return ResponseEntity.status(HttpStatus.CREATED).body(candidature);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            candidature.setSectors(managedSectors);
         }
+        
+        // 4. Définir la date si non fournie
+        if (candidature.getAppDate() == null) {
+            candidature.setAppDate(new Date());
+        }
+        
+        // 5. Persister la candidature
+        candidatureDao.persist(candidature);
+        return ResponseEntity.status(HttpStatus.CREATED).body(candidature);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
     }
     
     /**

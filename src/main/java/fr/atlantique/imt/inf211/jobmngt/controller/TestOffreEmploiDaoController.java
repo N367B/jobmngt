@@ -67,17 +67,34 @@ public class TestOffreEmploiDaoController {
     
     /**
      * Recherche des offres par secteur et niveau de qualification
-     * @param idSecteur ID du secteur
-     * @param idQualification ID du niveau de qualification
+     * @param secteurParam ID ou label du secteur
+     * @param qualificationParam ID ou label du niveau de qualification
      * @return Liste des offres correspondant aux critères
      */
     @GetMapping("/search")
     public ResponseEntity<List<OffreEmploi>> searchOffres(
-            @RequestParam("secteur") int idSecteur,
-            @RequestParam("qualification") int idQualification) {
+            @RequestParam("secteur") String secteurParam,
+            @RequestParam("qualification") String qualificationParam) {
         try {
-            Sector sector = sectorDao.findById(idSecteur);
-            QualificationLevel qualificationLevel = qualificationLevelDao.findById(idQualification);
+            Sector sector = null;
+            QualificationLevel qualificationLevel = null;
+            
+            // Tenter de parser comme des IDs
+            try {
+                int idSecteur = Integer.parseInt(secteurParam);
+                sector = sectorDao.findById(idSecteur);
+            } catch (NumberFormatException e) {
+                // Ce n'est pas un ID, on cherche par label
+                sector = sectorDao.findByLabel(secteurParam);
+            }
+            
+            try {
+                int idQualification = Integer.parseInt(qualificationParam);
+                qualificationLevel = qualificationLevelDao.findById(idQualification);
+            } catch (NumberFormatException e) {
+                // Ce n'est pas un ID, on cherche par label
+                qualificationLevel = qualificationLevelDao.findByLabel(qualificationParam);
+            }
             
             if (sector == null || qualificationLevel == null) {
                 return ResponseEntity.badRequest().build();
@@ -86,6 +103,7 @@ public class TestOffreEmploiDaoController {
             List<OffreEmploi> offres = offreEmploiDao.findBySectorAndQualificationLevel(sector, qualificationLevel);
             return ResponseEntity.ok(offres);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
