@@ -136,8 +136,11 @@ public class TestCandidatDaoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCandidat(@PathVariable int id) {
         Candidat candidat = candidatDao.findById(id);
-        if (candidat != null) {
+        AppUser appUser = candidat.getAppUser();
+        if (candidat != null && candidat.getAppUser() != null) {
             candidatDao.remove(candidat);
+            // Supprimer l'appUser
+            appUserDao.remove(appUser);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();

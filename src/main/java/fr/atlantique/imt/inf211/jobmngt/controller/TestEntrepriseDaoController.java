@@ -100,8 +100,11 @@ public class TestEntrepriseDaoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEntreprise(@PathVariable int id) {
         Entreprise entreprise = entrepriseDao.findById(id);
-        if (entreprise != null) {
+        AppUser appUser = entreprise.getAppUser();
+        if (entreprise != null && entreprise.getAppUser() != null) {
             entrepriseDao.remove(entreprise);
+            // Supprimer AppUser associé
+            appUserDao.remove(appUser);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
