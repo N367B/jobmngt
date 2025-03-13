@@ -113,16 +113,7 @@ public class TestOffreEmploiDaoController {
      * @param offre L'offre d'emploi à créer
      * @return L'offre d'emploi créée avec son ID
      */
-    /* 
-    @PostMapping
-    public ResponseEntity<OffreEmploi> createOffre(@RequestBody OffreEmploi offre) {
-        try {
-            offreEmploiDao.persist(offre);
-            return ResponseEntity.status(HttpStatus.CREATED).body(offre);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }*/
+
     @PostMapping
     public ResponseEntity<OffreEmploi> createOffre(@RequestBody OffreEmploi offre) {
         try {
