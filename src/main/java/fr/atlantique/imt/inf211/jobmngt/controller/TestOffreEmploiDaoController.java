@@ -117,7 +117,7 @@ public class TestOffreEmploiDaoController {
     @PostMapping
     public ResponseEntity<OffreEmploi> createOffre(@RequestBody OffreEmploi offre) {
         try {
-            // 1. Gestion de l'entreprise (par ID ou email)
+            // Gestion de l'entreprise (par ID ou email)
             Entreprise entreprise = null;
             if (offre.getEntreprise() != null) {
                 // Recherche par ID
@@ -137,7 +137,7 @@ public class TestOffreEmploiDaoController {
             }
             offre.setEntreprise(entreprise);
             
-            // 2. Gestion du niveau de qualification (par ID ou label)
+            // Gestion du niveau de qualification (par ID ou label)
             QualificationLevel qualificationLevel = null;
             if (offre.getQualificationLevel() != null) {
                 // Recherche par ID
@@ -166,7 +166,7 @@ public class TestOffreEmploiDaoController {
             }
             offre.setQualificationLevel(qualificationLevel);
             
-            // 3. Gestion des secteurs (par ID ou label)
+            // Gestion des secteurs (par ID ou label)
             if (offre.getSectors() != null && !offre.getSectors().isEmpty()) {
                 Set<Sector> detachedSectors = new HashSet<>(offre.getSectors());
                 Set<Sector> managedSectors = new HashSet<>();
@@ -201,12 +201,12 @@ public class TestOffreEmploiDaoController {
                 offre.setSectors(managedSectors);
             }
             
-            // 4. Définir la date si non fournie
+            // Définir la date si non fournie
             if (offre.getPublicationDate() == null) {
                 offre.setPublicationDate(new Date());
             }
             
-            // 5. Persister l'offre
+            // Persister l'offre
             offreEmploiDao.persist(offre);
             return ResponseEntity.status(HttpStatus.CREATED).body(offre);
         } catch (Exception e) {

@@ -122,7 +122,7 @@ public class TestCandidatureDaoController {
     @PostMapping
     public ResponseEntity<Candidature> createCandidature(@RequestBody Candidature candidature) {
         try {
-        // 1. Gestion du candidat
+        // Gestion du candidat
         Candidat candidat = null;
         if (candidature.getCandidat() != null) {
             // Recherche par ID
@@ -184,7 +184,7 @@ public class TestCandidatureDaoController {
         }
         candidature.setQualificationLevel(qualificationLevel);
         
-        // 3. Gestion des secteurs
+        // Gestion des secteurs
         if (candidature.getSectors() != null && !candidature.getSectors().isEmpty()) {
             Set<Sector> detachedSectors = new HashSet<>(candidature.getSectors());
             Set<Sector> managedSectors = new HashSet<>();
@@ -219,12 +219,12 @@ public class TestCandidatureDaoController {
             candidature.setSectors(managedSectors);
         }
         
-        // 4. Définir la date si non fournie
+        // Définir la date si non fournie
         if (candidature.getAppDate() == null) {
             candidature.setAppDate(new Date());
         }
         
-        // 5. Persister la candidature
+        // Persister la candidature
         candidatureDao.persist(candidature);
         return ResponseEntity.status(HttpStatus.CREATED).body(candidature);
     } catch (Exception e) {
