@@ -1,7 +1,7 @@
 -- =================================================================================
 -- Title :             jobmngt_db_creation.sql
 -- Description :       Script de création des tables pour l'application Job Management
--- Auteur :            BODIN Noé
+-- Auteur :            BODIN Noé LE COQ Justine
 -- Date de création :  2025-03-06
 -- =================================================================================
 
