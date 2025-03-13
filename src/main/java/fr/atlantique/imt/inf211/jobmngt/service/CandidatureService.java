@@ -1,0 +1,19 @@
+package fr.atlantique.imt.inf211.jobmngt.service;
+
+import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
+import java.util.List;
+
+public interface CandidatureService {
+    
+    List<Candidature> listCandidatures();
+    
+    Candidature getCandidatureById(int id);
+    
+    long countCandidatures();
+    
+    Candidature saveCandidature(Candidature candidature);
+    
+    boolean deleteCandidature(int id);
+    
+    List<Candidature> searchCandidatures(String secteur, String qualification);
+}

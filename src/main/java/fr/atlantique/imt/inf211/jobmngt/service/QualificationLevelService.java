@@ -10,5 +10,11 @@ public interface QualificationLevelService {
     public List<QualificationLevel> listOfQualificationLevels();
 
     public long countQualificationLevel();
+
+    public QualificationLevel getQualificationLevelById(int id);
+    public QualificationLevel findByLabel(String label);
+    public void saveQualificationLevel(QualificationLevel qualificationLevel);
+    public boolean deleteQualificationLevel(int id);
+
     
 }

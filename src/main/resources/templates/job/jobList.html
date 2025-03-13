@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/job/jobBase :: article(~{::article})}">
+<article>
+    <header class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a th:href="@{/jobs/create}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Post a new job offer
+            </a>
+        </div>
+    </header>
+
+    <section class="mb-4">
+        <h2>Search Job Offers</h2>
+        <form th:action="@{/jobs/search}" method="get" class="row g-3">
+            <div class="col-md-5">
+                <label for="sector" class="form-label">Sector</label>
+                <select id="sector" name="sector" class="form-select">
+                    <option value="">Select a sector</option>
+                    <option th:each="sector : ${sectors}" 
+                            th:value="${sector.labelSecteur}" 
+                            th:text="${sector.labelSecteur}" 
+                            th:selected="${selectedSector == sector.labelSecteur}"></option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label for="qualification" class="form-label">Qualification Level</label>
+                <select id="qualification" name="qualification" class="form-select">
+                    <option value="">Select a qualification level</option>
+                    <option th:each="level : ${qualificationLevels}" 
+                            th:value="${level.labelQualification}" 
+                            th:text="${level.labelQualification}"
+                            th:selected="${selectedQualification == level.labelQualification}"></option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </section>
+
+    <div th:if="${#lists.isEmpty(jobslist)}" class="alert alert-info">
+        No job offers found. Be the first to <a th:href="@{/jobs/create}" class="alert-link">post one</a>!
+    </div>
+
+    <div th:if="${not #lists.isEmpty(jobslist)}" class="row row-cols-1 row-cols-md-2 g-4">
+        <div th:each="job : ${jobslist}" class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title" th:text="${job.title}">Job Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted" th:if="${job.entreprise != null}" th:text="${job.entreprise.denomination}">Company</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text" th:text="${#strings.abbreviate(job.taskDescription, 150)}">Description</p>
+                    <div class="mb-2">
+                        <span class="badge bg-info" th:if="${job.qualificationLevel != null}" th:text="${job.qualificationLevel.labelQualification}">Qualification</span>
+                        <span th:each="sector : ${job.sectors}" class="badge bg-secondary ms-1" th:text="${sector.labelSecteur}">Sector</span>
+                    </div>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Posted on <span th:text="${#dates.format(job.publicationDate, 'dd-MM-yyyy')}">01-01-2025</span>
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/jobs/{id}(id=${job.idOffreEmploi})}" class="btn btn-primary">View details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <a th:href="@{/jobs/create}" class="btn btn-large btn-primary" title="add new job offer">
+            <i class="bi bi-plus"></i>
+        </a>
+    </footer>
+</article>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/candidate/candidateBase :: article(~{::article})}">
+<article>
+    <p th:if="${#lists.size(candidateslist)} == 0">No candidate registered yet.</p>
+    <table class="table table-striped" th:if="${#lists.size(candidateslist)} > 0">
+        <caption>List of candidates (<span th:text="${candidateslist.size}"></span>)</caption>
+        <thead>
+            <tr>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">City</th>
+                <th scope="col">Nb. of applications</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="cand : ${candidateslist}">
+                 <td th:text="${cand.firstName}" />
+                <td th:text="${cand.lastName}" />
+                <td th:text="${cand.appUser.city}" />
+                <td th:text="${cand.candidatures.size()}" />
+                <td>
+                    <a th:href="@{candidates/}+${cand.idCandidat}" alt="Candidate details" title="view details" class="btn btn-large btn-secondary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a th:href="@{candidates/{candidateId}/edit(candidateId=${cand.idCandidat})}" class="btn btn-large btn-success" alt="Edit" title="edit candidate">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a th:href="@{candidates/{candidateId}/delete(candidateId=${cand.idCandidat})}" class="btn btn-large btn-danger delBtn"
+                        alt="Delete" title="delete candidate " data-id="@{candidates/{candidateId}/delete(candidateId=${cand.idCandidat})}" th:attrappend="title=${' ' + cand.firstName + ' ' + cand.lastName}">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <footer>
+        <a th:href="@{candidates/create}" class="btn btn-large btn-primary" title="add new candidate">
+            <i class="bi bi-plus"></i>
+        </a>
+
+    </footer>
+</article>
+
+</html>

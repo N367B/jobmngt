@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/job/jobBase :: article(~{::article})}">
+<article>
+    <header>
+        <h2 th:text="${action == 'create' ? 'Create new job offer' : 'Edit job offer'}">Job Form</h2>
+    </header>
+    
+    <form th:action="@{''}" method="post">
+        <input type="hidden" name="idOffreEmploi" th:if="${job.idOffreEmploi > 0}" th:value="${job.idOffreEmploi}" />
+        
+        <fieldset class="mb-3">
+            <label for="title" class="form-label">Job Title</label>
+            <input type="text" id="title" class="form-control" name="title" th:value="${job.title}" required />
+        </fieldset>
+        
+        <fieldset class="mb-3">
+            <label for="taskDescription" class="form-label">Description</label>
+            <textarea id="taskDescription" class="form-control" name="taskDescription" rows="5" required
+                      th:text="${job.taskDescription}"></textarea>
+        </fieldset>
+        
+        <fieldset class="mb-3">
+            <label for="qualificationLevel" class="form-label">Required Qualification Level</label>
+            <select id="qualificationLevel" name="qualificationLevel.idQualification" class="form-select" required>
+                <option value="">Select a qualification level</option>
+                <option th:each="level : ${qualificationLevels}" 
+                        th:value="${level.idQualification}" 
+                        th:text="${level.labelQualification}"
+                        th:selected="${job.qualificationLevel != null && job.qualificationLevel.idQualification == level.idQualification}">
+                </option>
+            </select>
+        </fieldset>
+        
+        <fieldset class="mb-3">
+            <label class="form-label">Sectors</label>
+            <div class="border p-3 rounded">
+                <div class="row">
+                    <div th:each="sector : ${sectors}" class="col-md-4 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" th:id="${'sector-' + sector.idSecteur}" 
+                                   name="selectedSectors" th:value="${sector.idSecteur}" 
+                                   th:checked="${job.sectors != null && job.sectors.contains(sector)}" />
+                            <label class="form-check-label" th:for="${'sector-' + sector.idSecteur}" th:text="${sector.labelSecteur}">
+                                Sector Name
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Save
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                <i class="bi bi-eraser"></i> Reset
+            </button>
+            <a th:href="@{/jobs}" class="btn btn-danger">
+                <i class="bi bi-x-circle"></i> Cancel
+            </a>
+        </div>
+    </form>
+</article>
+</html>

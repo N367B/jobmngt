@@ -17,17 +17,17 @@
             <tr th:each="comp : ${companieslist}">
                  <td th:text="${comp.denomination}" />
                 <td th:text="${comp.description}" />
-                <td th:text="${comp.city}" />
-                <td th:text="${comp.joboffers.size()}" />
+                <td th:text="${comp.appUser.city}" />
+                <td th:text="${comp.offreEmplois.size()}" />
                 <td>
-                    <a th:href="@{companies/}+${comp.id}" alt="Company details" title="view details" class="btn btn-large btn-secondary">
+                    <a th:href="@{companies/}+${comp.idEntreprise}" alt="Company details" title="view details" class="btn btn-large btn-secondary">
                         <i class="bi bi-eye"></i>
                     </a>
-                    <a th:href="@{companies/{companyId}/edit(companyId=${comp.id})}" class="btn btn-large btn-success" alt="Edit" title="edit company">
+                    <a th:href="@{companies/{companyId}/edit(companyId=${comp.idEntreprise})}" class="btn btn-large btn-success" alt="Edit" title="edit company">
                         <i class="bi bi-pencil"></i>
                     </a>
-                    <a th:href="@{companies/{companyId}/delete(companyId=${comp.id})}" class="btn btn-large btn-danger delBtn"
-                        alt="Delete" title="delete company " data-id="@{companies/{companyId}/delete(companyId=${comp.id})}" th:attrappend="title=${' ' + comp.denomination}">
+                    <a th:href="@{companies/{companyId}/delete(companyId=${comp.idEntreprise})}" class="btn btn-large btn-danger delBtn"
+                        alt="Delete" title="delete company " data-id="@{companies/{companyId}/delete(companyId=${comp.idEntreprise})}" th:attrappend="title=${' ' + comp.denomination}">
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>

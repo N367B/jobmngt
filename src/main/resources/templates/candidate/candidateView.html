@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/candidate/candidateBase :: article(~{::article})}">
+<article>
+    <header>
+        <h2>Candidate details</h2>
+    </header>
+    <form>
+        <fieldset class="mb-3">
+            <label for="firstnameid" class="form-label">First Name</label>:
+            <input type="text" id="firstnameid" class="form-control" name="firstName" autofocus="autofocus"
+                th:value="${candidate.firstName}" readonly />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="lastnameid" class="form-label">Last Name</label>:
+            <input type="text" id="lastnameid" class="form-control" name="lastName" th:value="${candidate.lastName}"
+                readonly />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="emailid" class="form-label">Email</label>:
+            <input type="email" id="emailid" class="form-control" name="appUser.mail" th:value="${candidate.appUser.mail}"
+                readonly />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="cityid" class="form-label">City</label>:
+            <input type="text" id="cityid" class="form-control" name="appUser.city" th:value="${candidate.appUser.city}" readonly />
+        </fieldset>
+    </form>
+
+    <aside th:if="${#lists.size(candidate.candidatures)} > 0">
+        <h2>List of applications</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">CV</th>
+                    <th scope="col">Application date</th>
+                    <th scope="col">Qualification level</th>
+                    <th scope="col">Sectors</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="app : ${candidate.candidatures}">
+                    <th scope="row" th:text="${app.idCandidature}" />
+                    <td th:text="${app.cv}" />
+                    <td th:text="${app.appDate}" />
+                    <td th:text="${app.qualificationLevel.labelQualification}" />
+                    <td><span th:each="sec : ${app.sectors}"><span th:text="${sec.labelSecteur}"></span> </span></td>
+                </tr>
+            </tbody>
+        </table>
+    </aside>
+
+    <footer>
+        <a th:href="@{/candidates/{candidateId}/edit(candidateId=${candidate.idCandidat})}" class="btn btn-large btn-primary"
+            title="Unlock to update"><i class="bi bi-pencil"></i></a>
+        <a th:href="@{/candidates}" class="btn btn-secondary" title="go back"><i class="bi bi-list-columns"></i></a>
+    </footer>
+</article>
+
+</html>

@@ -22,4 +22,36 @@ public class SectorServiceImpl implements SectorService {
         return sectorDao.count();
     }
 
+
+    @Override
+    public Sector getSectorById(int id) {
+        return sectorDao.findById(id);
+    }
+    
+    @Override
+    public Sector findByLabel(String label) {
+        return sectorDao.findByLabel(label);
+    }
+
+    @Override
+    public void saveSector(Sector sector) {
+        if (sector.getIdSecteur() == 0) {
+            sectorDao.persist(sector);
+        } else {
+            sectorDao.merge(sector);
+        }
+    }
+    
+    @Override
+    public boolean deleteSector(int id) {
+        Sector sector = sectorDao.findById(id);
+        if (sector != null) {
+            sectorDao.remove(sector);
+            return true;
+        }
+        return false;
+    }
+
+
+
 }

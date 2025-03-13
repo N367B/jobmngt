@@ -22,4 +22,36 @@ public class QualificationLevelServiceImpl implements QualificationLevelService 
         return qualificationLevelDao.count();
     }
 
+
+
+    @Override
+    public QualificationLevel getQualificationLevelById(int id) {
+        return qualificationLevelDao.findById(id);
+    }
+    
+    @Override
+    public QualificationLevel findByLabel(String label) {
+        return qualificationLevelDao.findByLabel(label);
+    }
+
+    @Override
+    public void saveQualificationLevel(QualificationLevel qualificationLevel) {
+        if (qualificationLevel.getIdQualification() == 0) {
+            qualificationLevelDao.persist(qualificationLevel);
+        } else {
+            qualificationLevelDao.merge(qualificationLevel);
+        }
+    }
+    
+    @Override
+    public boolean deleteQualificationLevel(int id) {
+        QualificationLevel qualificationLevel = qualificationLevelDao.findById(id);
+        if (qualificationLevel != null) {
+            qualificationLevelDao.remove(qualificationLevel);
+            return true;
+        }
+        return false;
+    }
+
+
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/candidate/candidateBase :: article(~{::article})}">
+<article>
+    <header>
+        <h2>Candidate entry form</h2>
+    </header>
+    <form th:action="@{''}" method="post">
+        <fieldset class="mb-3">
+            <label for="firstnameid" class="form-label">First Name</label>:
+            <input type="text" id="firstnameid" class="form-control" name="firstName" autofocus="autofocus"
+                th:value="${candidate.firstName}" required />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="lastnameid" class="form-label">Last Name</label>:
+            <input type="text" id="lastnameid" class="form-control" name="lastName" th:value="${candidate.lastName}"
+                required />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="emailid" class="form-label">Email</label>:
+            <input type="email" id="emailid" class="form-control" name="appUser.mail" th:value="${candidate.appUser.mail}"
+                required />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="passwordid" class="form-label">Password</label>:
+            <input type="password" id="passwordid" class="form-control" name="appUser.password" 
+                th:value="${candidate.appUser.password}" required />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="cityid" class="form-label">City</label>:
+            <input type="text" id="cityid" class="form-control" name="appUser.city" th:value="${candidate.appUser.city}" required />
+        </fieldset>
+        <button type="submit" class="btn btn-primary" th:title="${action}"><i class="bi bi-floppy"></i></button>
+        <button type="reset" class="btn btn-secondary" value="Reset" title="reset"><i class="bi bi-eraser-fill"></i></button>
+        <a th:href="@{/candidates}" class="btn btn-danger" title="go back"><i class="bi bi-x-square"></i></a>
+    </form>
+
+    <aside th:if="${candidate.idCandidat > 0 && candidate.candidatures != null && !candidate.candidatures.isEmpty()}">
+        <h2>List of candidate applications</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">CV</th>
+                    <th scope="col">Application date</th>
+                    <th scope="col">Qualification level</th>
+                    <th scope="col">Sectors</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="app : ${candidate.candidatures}">
+                    <th scope="row" th:text="${app.idCandidature}" />
+                    <td th:text="${app.cv}" />
+                    <td th:text="${app.appDate}" />
+                    <td th:text="${app.qualificationLevel != null ? app.qualificationLevel.labelQualification : ''}" />
+                    <td><span th:each="sec : ${app.sectors}"><span th:text="${sec.labelSecteur}"></span> </span></td>
+                    <td><a th:href="@{/applications/}+${app.idCandidature}"><i class="bi bi-eye"></i></a></td>
+                </tr>
+            </tbody>
+        </table>
+    </aside>
+</article>
+
+</html>
