@@ -8,6 +8,11 @@
      "@{{action}==create? /companies/create : /companies/{id}/edit(id=${company.id},action=${action})}"
      @{${action}=='create1'? /companies/create : /companies/{id}/edit(id=${company.id})}
      -->
+
+     <!-- Affichage des erreurs -->
+     <div th:if="${error != null}" class="alert alert-danger" role="alert">
+        <p th:text="${error}"></p>
+    </div>
     <form th:action="@{''}" method="post">
         <fieldset class="mb-3">
             <label for="nameid" class="form-label">Name</label>:
@@ -21,7 +26,7 @@
         </fieldset>
         <fieldset class="mb-3">
             <label for="cityid" class="form-label">City</label>:
-            <input type="text" id="cityid" class="form-control" name="city" th:value="${company.appUser.city}" required />
+            <input type="text" id="cityid" class="form-control" name="appUser.city" th:value="${company.appUser.city}" required />
         </fieldset>
         <fieldset class="mb-3">
             <label for="emailid" class="form-label">Email</label>:
