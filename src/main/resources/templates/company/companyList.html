@@ -23,7 +23,10 @@
                     <a th:href="@{companies/}+${comp.idEntreprise}" alt="Company details" title="view details" class="btn btn-large btn-secondary">
                         <i class="bi bi-eye"></i>
                     </a>
-                    <a th:href="@{companies/{companyId}/edit(companyId=${comp.idEntreprise})}" class="btn btn-large btn-success" alt="Edit" title="edit company">
+                    <a th:href="@{/companies/{companyId}/edit(companyId=${comp.idEntreprise})}" 
+                        class="btn btn-large btn-success" 
+                        alt="Edit" 
+                        title="edit company">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a th:href="@{companies/{companyId}/delete(companyId=${comp.idEntreprise})}" 

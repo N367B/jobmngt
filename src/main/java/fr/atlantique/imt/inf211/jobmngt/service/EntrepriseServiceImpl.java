@@ -50,7 +50,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     }
 
 
-    @Override
+    /*@Override
     public Entreprise saveEntreprise(Entreprise entreprise) {
         // Vérifier si un utilisateur (candidat OU entreprise) avec cet email existe déjà
         Optional<AppUser> existingUser = appUserDao.findByMail(entreprise.getAppUser().getMail());
@@ -65,6 +65,38 @@ public class EntrepriseServiceImpl implements EntrepriseService {
             entreprise = entrepriseDao.merge(entreprise);
         }
         return entreprise;
+    }*/
+
+    @Override
+    public Entreprise saveEntreprise(Entreprise entreprise) {
+    // Vérifier si un utilisateur avec cet email existe déjà
+    Optional<AppUser> existingUser = appUserDao.findByMail(entreprise.getAppUser().getMail());
+    if (existingUser.isPresent() && existingUser.get().getIdUser() != entreprise.getAppUser().getIdUser()) {
+        throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur.");
+    }
+
+    if (entreprise.getIdEntreprise() == 0) {
+        // Nouvelle entreprise, persister directement
+        entrepriseDao.persist(entreprise);
+    } else {
+        // Entreprise existante, conserver les informations non modifiées
+        Entreprise existingEntreprise = entrepriseDao.findById(entreprise.getIdEntreprise());
+        if (existingEntreprise != null) {
+            AppUser existingAppUser = existingEntreprise.getAppUser();
+
+            // Mettre à jour les champs de l'utilisateur associé
+            existingAppUser.setMail(entreprise.getAppUser().getMail());
+            existingAppUser.setPassword(entreprise.getAppUser().getPassword());
+            existingAppUser.setCity(entreprise.getAppUser().getCity());
+
+            // Associer l'utilisateur mis à jour à l'entreprise
+            entreprise.setAppUser(existingAppUser);
+        }
+
+        // Mettre à jour l'entreprise
+        entreprise = entrepriseDao.merge(entreprise);
+    }
+    return entreprise;
     }
 
     @Override
