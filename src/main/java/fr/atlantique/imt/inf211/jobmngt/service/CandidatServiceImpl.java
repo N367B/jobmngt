@@ -36,7 +36,7 @@ public class CandidatServiceImpl implements CandidatService {
         return candidatDao.findAll().size();
     }
 
-@Override
+/*@Override
 public Candidat saveCandidat(Candidat candidat) {
     // Vérifier si un utilisateur (candidat OU entreprise) avec cet email existe déjà
     Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
@@ -48,6 +48,38 @@ public Candidat saveCandidat(Candidat candidat) {
     if (candidat.getIdCandidat() == 0) {
         candidatDao.persist(candidat);
     } else {
+        candidat = candidatDao.merge(candidat);
+    }
+    return candidat;
+}*/
+
+@Override
+public Candidat saveCandidat(Candidat candidat) {
+    // Vérifier si un utilisateur avec cet email existe déjà
+    Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
+    if (existingUser.isPresent() && existingUser.get().getIdUser() != candidat.getAppUser().getIdUser()) {
+        throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur.");
+    }
+
+    if (candidat.getIdCandidat() == 0) {
+        // Nouveau candidat, persister directement
+        candidatDao.persist(candidat);
+    } else {
+        // Candidat existant, conserver les informations non modifiées
+        Candidat existingCandidat = candidatDao.findById(candidat.getIdCandidat());
+        if (existingCandidat != null) {
+            AppUser existingAppUser = existingCandidat.getAppUser();
+
+            // Mettre à jour les champs de l'utilisateur associé
+            existingAppUser.setMail(candidat.getAppUser().getMail());
+            existingAppUser.setPassword(candidat.getAppUser().getPassword());
+            existingAppUser.setCity(candidat.getAppUser().getCity());
+
+            // Associer l'utilisateur mis à jour au candidat
+            candidat.setAppUser(existingAppUser);
+        }
+
+        // Mettre à jour le candidat
         candidat = candidatDao.merge(candidat);
     }
     return candidat;
