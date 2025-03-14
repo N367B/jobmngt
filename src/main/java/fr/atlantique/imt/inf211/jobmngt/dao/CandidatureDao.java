@@ -63,6 +63,7 @@ public class CandidatureDao {
         }
     }
     
+    
     @Transactional(readOnly = true)
     public Candidature findById( int id) {
         logger.log(Level.INFO, "getting Candidature instance with id: " + id);
@@ -76,6 +77,33 @@ public class CandidatureDao {
             throw re;
         }
     }
+    /*
+    @Transactional(readOnly = true)
+    public Candidature findById(int id) {
+        logger.log(Level.INFO, "getting Candidature instance with id: " + id);
+        try {
+            // Utiliser une requête JPQL avec fetch join pour charger les relations importantes
+            Candidature instance = entityManager.createQuery(
+                    "SELECT c FROM Candidature c " +
+                    "LEFT JOIN FETCH c.candidat " +
+                    "LEFT JOIN FETCH c.candidat.appUser " +
+                    "LEFT JOIN FETCH c.qualificationLevel " +
+                    "LEFT JOIN FETCH c.sectors " +
+                    "LEFT JOIN FETCH c.messageOffres " +
+                    "WHERE c.idCandidature = :id", Candidature.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            logger.log(Level.INFO, "get successful");
+            return instance;
+        } catch (jakarta.persistence.NoResultException nre) {
+            logger.log(Level.INFO, "get failed - no result", nre);
+            return null;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }*/
+
 
     @Transactional(readOnly = true)
     public List<Candidature> findBySectorAndQualificationLevel(Sector sector, QualificationLevel qualificationLevel) {

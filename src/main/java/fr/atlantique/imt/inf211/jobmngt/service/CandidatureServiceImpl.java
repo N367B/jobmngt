@@ -29,10 +29,47 @@ public class CandidatureServiceImpl implements CandidatureService {
         return candidatureDao.findAll();
     }
 
+    
     @Override
     public Candidature getCandidatureById(int id) {
         return candidatureDao.findById(id);
     }
+
+    /*
+    @Override
+    public Candidature getCandidatureById(int id) {
+        Candidature candidature = candidatureDao.findById(id);
+        
+        // Force l'initialisation des propriétés lazy loaded
+        if (candidature != null) {
+            // Initialiser le candidat et ses propriétés
+            if (candidature.getCandidat() != null) {
+                // Accéder aux propriétés pour forcer l'initialisation
+                String firstName = candidature.getCandidat().getFirstName();
+                String lastName = candidature.getCandidat().getLastName();
+                
+                // Force l'initialisation de l'utilisateur associé
+                if (candidature.getCandidat().getAppUser() != null) {
+                    String city = candidature.getCandidat().getAppUser().getCity();
+                }
+            }
+            
+            // Force l'initialisation du niveau de qualification
+            if (candidature.getQualificationLevel() != null) {
+                String label = candidature.getQualificationLevel().getLabelQualification();
+            }
+            
+            // Force l'initialisation des secteurs
+            if (candidature.getSectors() != null && !candidature.getSectors().isEmpty()) {
+                candidature.getSectors().size(); // Force l'initialisation de la collection
+                for (Sector sector : candidature.getSectors()) {
+                    String labelSecteur = sector.getLabelSecteur();
+                }
+            }
+        }
+        
+        return candidature;
+    }*/
     
     @Override
     public long countCandidatures() {

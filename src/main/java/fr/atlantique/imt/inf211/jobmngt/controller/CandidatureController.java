@@ -1,5 +1,6 @@
 package fr.atlantique.imt.inf211.jobmngt.controller;
 
+import fr.atlantique.imt.inf211.jobmngt.dto.candidature.CandidatureDTO;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
@@ -56,6 +57,7 @@ public class CandidatureController {
         return modelAndView;
     }
 
+    /* 
     @GetMapping("/{id}")
     public ModelAndView viewApplication(@PathVariable int id) {
         ModelAndView modelAndView = new ModelAndView("application/applicationView");
@@ -65,7 +67,41 @@ public class CandidatureController {
             return new ModelAndView("redirect:/applications");
         }
         
+        // Débogage
+        System.out.println("Application ID: " + application.getIdCandidature());
+        System.out.println("Candidat: " + (application.getCandidat() != null ? "Not null" : "NULL"));
+        if (application.getCandidat() == null) {
+            // Si candidat est null, utilisez un candidat par défaut pour éviter l'erreur
+            Candidat defaultCandidat = new Candidat();
+            defaultCandidat.setFirstName("Non");
+            defaultCandidat.setLastName("Spécifié");
+            application.setCandidat(defaultCandidat);
+        } else {
+            System.out.println("Candidat ID: " + application.getCandidat().getIdCandidat());
+            System.out.println("Candidat Name: " + application.getCandidat().getFirstName() + " " + application.getCandidat().getLastName());
+        }
+        application.getCandidat().setFirstName("test");
+        application.getCandidat().setLastName("Test");
         modelAndView.addObject("application", application);
+        return modelAndView;
+    }*/
+
+    @GetMapping("/{id}")
+    public ModelAndView viewApplication(@PathVariable int id) {
+        ModelAndView modelAndView = new ModelAndView("application/applicationView");
+        Candidature application = candidatureService.getCandidatureById(id);
+        
+        if (application == null) {
+            return new ModelAndView("redirect:/applications");
+        }
+        
+        // Convertir en DTO pour éviter les problèmes de lazy loading
+        CandidatureDTO applicationDTO = new CandidatureDTO(application);
+        
+        // Passer à la fois le DTO et l'objet d'origine au modèle
+        modelAndView.addObject("applicationDTO", applicationDTO);
+        modelAndView.addObject("application", application);
+        
         return modelAndView;
     }
 
