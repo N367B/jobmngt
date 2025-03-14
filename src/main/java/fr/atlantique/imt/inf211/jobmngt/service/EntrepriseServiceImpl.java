@@ -1,6 +1,8 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
+import fr.atlantique.imt.inf211.jobmngt.dao.AppUserDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.EntrepriseDao;
+import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,9 @@ public class EntrepriseServiceImpl implements EntrepriseService {
 
     @Autowired
     private EntrepriseDao entrepriseDao;
+
+    @Autowired
+    private AppUserDao appUserDao;
 
     @Override
     public List<Entreprise> listEntreprises() {
@@ -51,7 +56,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
         if (existingEntreprises !=null) {
             throw new IllegalArgumentException("Une entreprise avec cet email existe déjà.");
         }
-        
+
         if (entreprise.getIdEntreprise() == 0) {
             entrepriseDao.persist(entreprise);
         } else {
@@ -62,11 +67,21 @@ public class EntrepriseServiceImpl implements EntrepriseService {
 
     @Override
     public boolean deleteEntreprise(int id) {
-        Entreprise entreprise = entrepriseDao.findById(id);
-        if (entreprise != null) {
-            entrepriseDao.remove(entreprise);
-            return true;
+    // Récupérer l'entreprise par son ID
+    Entreprise entreprise = entrepriseDao.findById(id);
+    if (entreprise != null) {
+        // Récupérer l'utilisateur associé
+        AppUser appUser = entreprise.getAppUser();
+        
+        // Supprimer l'entreprise
+        entrepriseDao.remove(entreprise);
+        
+        // Supprimer l'utilisateur associé si nécessaire
+        if (appUser != null) {
+            appUserDao.remove(appUser);
         }
-        return false;
+        return true;
     }
+    return false;
+}
 }
