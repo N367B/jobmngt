@@ -37,7 +37,9 @@
             <input type="password" id="passwordid" class="form-control" name="appUser.password" th:value="${company.appUser.password}" required />
         </fieldset>
         <button type="submit"  class="btn btn-primary" th:title="${action}"><i class="bi bi-floppy"></i></button>
-        <button type="reset" class="btn btn-secondary" value="Reset" title="reset"><i class="bi bi-eraser-fill"></i></button>
+        <button type="reset" class="btn btn-secondary" title="reset" onclick="resetForm()">
+            <i class="bi bi-eraser-fill"></i> Reset
+        </button>
         <a th:href="@{/companies}" class="btn btn-danger" title="go back"><i class="bi bi-x-square"></i></a>
     </form>
 

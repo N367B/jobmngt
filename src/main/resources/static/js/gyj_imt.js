@@ -47,6 +47,14 @@ function check_login(){
     });
 }
 
+function resetForm() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.reset();
+        // Réinitialiser les champs dynamiques
+        //document.querySelector('#dynamicField').value = '';
+    }
+}
 $(document).ready(function () {
     /*$('.table .delBtn').on('click', function (event) {
         event.preventDefault();
