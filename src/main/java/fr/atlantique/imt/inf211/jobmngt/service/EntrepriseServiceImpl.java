@@ -30,7 +30,28 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     }
 
     @Override
+    public Entreprise createEntreprise(Entreprise entreprise) {
+        // Vérifie si une entreprise avec le même email ou dénomination existe déjà
+        Entreprise existingEntreprises = entrepriseDao.findByUserMail(entreprise.getAppUser().getMail());
+        
+        if (existingEntreprises !=null) {
+            throw new IllegalArgumentException("Une entreprise avec cet email existe déjà.");
+        }
+
+        // Persiste la nouvelle entreprise
+        entrepriseDao.persist(entreprise);
+        return entreprise;
+    }
+
+
+    @Override
     public Entreprise saveEntreprise(Entreprise entreprise) {
+        Entreprise existingEntreprises = entrepriseDao.findByUserMail(entreprise.getAppUser().getMail());
+        
+        if (existingEntreprises !=null) {
+            throw new IllegalArgumentException("Une entreprise avec cet email existe déjà.");
+        }
+        
         if (entreprise.getIdEntreprise() == 0) {
             entrepriseDao.persist(entreprise);
         } else {
