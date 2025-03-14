@@ -87,37 +87,50 @@ public class EntrepriseController {
 
     @GetMapping("/{id}/edit")
     public ModelAndView editCompanyForm(@PathVariable int id, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-        
-        // Vérification que l'utilisateur est connecté
-        if (uid == null) {
-            return new ModelAndView("redirect:/login");
-        }
-        
-        ModelAndView modelAndView = new ModelAndView("company/companyForm");
-        Entreprise company = entrepriseService.getEntrepriseById(id);
-        
-        // Vérification que l'entreprise existe
-        if (company == null) {
-            return new ModelAndView("redirect:/companies");
-        }
-        
-        modelAndView.addObject("company", company);
-        modelAndView.addObject("action", "edit");
-        return modelAndView;
+    HttpSession session = request.getSession();
+    Integer uid = (Integer) session.getAttribute("uid");
+    String userType = (String) session.getAttribute("usertype");
+
+    // Vérification que l'utilisateur est connecté et est une entreprise
+    if (uid == null || !"entreprise".equals(userType)) {
+        return new ModelAndView("redirect:/login");
     }
 
-    @PostMapping("/{id}/edit")
-    public ModelAndView updateCompany(@PathVariable int id, @ModelAttribute Entreprise company) {
-        Entreprise existingCompany = entrepriseService.getEntrepriseById(id);
-        if (existingCompany != null) {
-            company.setIdEntreprise(id);
-            company.getAppUser().setIdUser(existingCompany.getAppUser().getIdUser());
-            entrepriseService.saveEntreprise(company);
-        }
-        return new ModelAndView("redirect:/companies/" + id);
+    // Vérification que l'entreprise correspond à l'utilisateur connecté
+    Entreprise company = entrepriseService.getEntrepriseById(id);
+    if (company == null || company.getAppUser().getIdUser() != uid) {
+        return new ModelAndView("redirect:/access-denied");
     }
+
+    ModelAndView modelAndView = new ModelAndView("company/companyForm");
+    modelAndView.addObject("company", company);
+    modelAndView.addObject("action", "edit");
+    return modelAndView;
+}
+
+@PostMapping("/{id}/edit")
+public ModelAndView updateCompany(@PathVariable int id, @ModelAttribute Entreprise company, HttpServletRequest request) {
+    HttpSession session = request.getSession();
+    Integer uid = (Integer) session.getAttribute("uid");
+
+    // Vérification que l'utilisateur est connecté
+    if (uid == null) {
+        return new ModelAndView("redirect:/login");
+    }
+
+    // Vérification que l'entreprise correspond à l'utilisateur connecté
+    Entreprise existingCompany = entrepriseService.getEntrepriseById(id);
+    if (existingCompany == null || existingCompany.getAppUser().getIdUser() != uid) {
+        return new ModelAndView("redirect:/access-denied");
+    }
+
+    // Mise à jour des données
+    company.setIdEntreprise(id);
+    company.getAppUser().setIdUser(existingCompany.getAppUser().getIdUser());
+    entrepriseService.saveEntreprise(company);
+
+    return new ModelAndView("redirect:/companies/" + id);
+}
 
     @GetMapping("/{id}/delete")
     public ModelAndView deleteCompany(@PathVariable int id) {

@@ -19,60 +19,60 @@ public class AuthenticationService {
      */
     public boolean authenticate(String email, String password, HttpSession session) {
         Optional<AppUser> userOpt = appUserDao.findByMail(email);
-        
+
         if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
             AppUser user = userOpt.get();
             session.setAttribute("uid", user.getIdUser());
             session.setAttribute("usertype", user.getUserType());
             session.setAttribute("email", user.getMail());
-            
+
             // Attributs supplémentaires selon le type d'utilisateur
             if ("entreprise".equals(user.getUserType()) && user.getEntreprise() != null) {
                 session.setAttribute("userName", user.getEntreprise().getDenomination());
             } else if ("candidat".equals(user.getUserType()) && user.getCandidat() != null) {
                 session.setAttribute("userName", user.getCandidat().getFirstName() + " " + user.getCandidat().getLastName());
             }
-            
+
             return true;
         }
         return false;
     }
-    
+
     /**
      * Déconnecte l'utilisateur en invalidant sa session
      */
     public void logout(HttpSession session) {
         session.invalidate();
     }
-    
+
     /**
      * Vérifie si l'utilisateur est authentifié
      */
     public boolean isAuthenticated(HttpSession session) {
         return session.getAttribute("uid") != null;
     }
-    
+
     /**
      * Vérifie si l'utilisateur est une entreprise
      */
     public boolean isEntreprise(HttpSession session) {
         return "entreprise".equals(session.getAttribute("usertype"));
     }
-    
+
     /**
      * Vérifie si l'utilisateur est un candidat
      */
     public boolean isCandidat(HttpSession session) {
         return "candidat".equals(session.getAttribute("usertype"));
     }
-    
+
     /**
      * Vérifie si l'utilisateur est un administrateur
      */
     public boolean isAdmin(HttpSession session) {
         return "admin".equals(session.getAttribute("usertype"));
     }
-    
+
     /**
      * Vérifie si l'utilisateur est le propriétaire d'une ressource
      */

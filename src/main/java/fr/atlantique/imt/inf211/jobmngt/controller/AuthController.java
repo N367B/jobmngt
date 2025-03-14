@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class AuthController {
@@ -25,14 +23,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String processLogin(@RequestParam String email, 
-                              @RequestParam String password,
-                              @RequestParam(required = false) String redirect,
-                              HttpServletRequest request) {
-        
+    public String processLogin(@RequestParam String email,
+                                @RequestParam String password,
+                                @RequestParam(required = false) String redirect,
+                                HttpServletRequest request) {
         HttpSession session = request.getSession();
         boolean success = authService.authenticate(email, password, session);
-        
+
         if (success) {
             if (redirect != null && !redirect.isEmpty() && !redirect.equals("/login")) {
                 return "redirect:" + redirect;
@@ -47,11 +44,6 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
         authService.logout(request.getSession());
-        return "redirect:/";
-    }
-    
-    @GetMapping("/error/403")
-    public String accessDenied() {
-        return "error/403";
+        return "redirect:/login";
     }
 }
