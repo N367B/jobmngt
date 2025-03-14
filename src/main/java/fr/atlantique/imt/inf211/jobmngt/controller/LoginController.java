@@ -22,7 +22,7 @@ import fr.atlantique.imt.inf211.jobmngt.service.AppUserService;
 
 @Controller
 public class LoginController {
-
+/* 
     // Value injected from the application.properties file
     @Value("${jobmngt.admin}")
     private String adminLogin;
@@ -70,6 +70,6 @@ public class LoginController {
         session.setAttribute("uid", null);
         session.setAttribute("user", null);
         return "redirect:/";
-    }
+    }*/
 
 }

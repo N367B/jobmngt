@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/baseTemplate/base :: layout(~{::title},~{::section})}">
+<title>Connexion</title>
+<section>
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Connexion</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" th:if="${param.error}">
+                        Identifiant ou mot de passe incorrect.
+                    </div>
+                    <form th:action="@{/login}" method="post">
+                        <input type="hidden" name="redirect" th:value="${redirect}" />
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Se connecter</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>Vous êtes candidat ?</p>
+                            <a th:href="@{/candidates/create}" class="btn btn-outline-primary">Créer un compte candidat</a>
+                        </div>
+                        <div class="col-md-6">
+                            <p>Vous êtes une entreprise ?</p>
+                            <a th:href="@{/companies/create}" class="btn btn-outline-secondary">Créer un compte entreprise</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>
