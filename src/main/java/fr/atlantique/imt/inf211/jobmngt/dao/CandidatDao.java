@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,24 @@ public class CandidatDao {
         }
     }
     
+    @Transactional(readOnly = true)
+    public Candidat findByUserMail(String mail) {
+    logger.log(Level.INFO, "getting Candidat instance with AppUser mail: " + mail);
+    try {
+        return entityManager.createQuery(
+                "SELECT c FROM Candidat c JOIN c.appUser u WHERE u.mail = :mail", 
+                Candidat.class)
+                .setParameter("mail", mail)
+                .getSingleResult();
+    } catch (NoResultException nre) {
+        logger.log(Level.INFO, "No candidat found with user mail: " + mail);
+        return null;
+    } catch (RuntimeException re) {
+        logger.log(Level.SEVERE, "findByUserMail failed", re);
+        throw re;
+    }
+}
+
     @Transactional
     public void remove(Candidat persistentInstance) {
         logger.log(Level.INFO, "removing Candidat instance");
