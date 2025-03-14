@@ -53,9 +53,36 @@ public class EntrepriseController {
 
     @PostMapping("/create")
     public ModelAndView createCompany(@ModelAttribute Entreprise company) {
-        company.getAppUser().setUserType("entreprise");
-        Entreprise savedCompany = entrepriseService.saveEntreprise(company);
-        return new ModelAndView("redirect:/companies/" + savedCompany.getIdEntreprise());
+        ModelAndView modelAndView = new ModelAndView();
+        
+        // Vérification de la longueur du mot de passe
+        if (company.getAppUser().getPassword() == null || company.getAppUser().getPassword().length() < 4) {
+            modelAndView.setViewName("company/companyForm");
+            modelAndView.addObject("company", company);
+            modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
+            modelAndView.addObject("action", "create");
+            return modelAndView;
+        }
+        
+        try {
+            company.getAppUser().setUserType("entreprise");
+            Entreprise savedCompany = entrepriseService.saveEntreprise(company);
+            return new ModelAndView("redirect:/companies/" + savedCompany.getIdEntreprise());
+        } catch (IllegalArgumentException e) {
+            // Capture l'exception lancée quand l'email existe déjà
+            modelAndView.setViewName("company/companyForm");
+            modelAndView.addObject("company", company);
+            modelAndView.addObject("error", "Une entreprise avec cet email existe déjà.");
+            modelAndView.addObject("action", "create");
+            return modelAndView;
+        } catch (Exception e) {
+            // Pour les autres erreurs
+            modelAndView.setViewName("company/companyForm");
+            modelAndView.addObject("company", company);
+            modelAndView.addObject("error", "Une erreur est survenue lors de la création de l'entreprise : " + e.getMessage());
+            modelAndView.addObject("action", "create");
+            return modelAndView;
+        }
     }
 
     @GetMapping("/{id}/edit")
