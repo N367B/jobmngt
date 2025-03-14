@@ -53,9 +53,36 @@ public class CandidatController {
 
     @PostMapping("/create")
     public ModelAndView createCandidate(@ModelAttribute Candidat candidate) {
-        candidate.getAppUser().setUserType("candidat");
-        Candidat savedCandidate = candidatService.saveCandidat(candidate);
-        return new ModelAndView("redirect:/candidates/" + savedCandidate.getIdCandidat());
+        ModelAndView modelAndView = new ModelAndView();
+        
+        // Vérification de la longueur du mot de passe
+        if (candidate.getAppUser().getPassword() == null || candidate.getAppUser().getPassword().length() < 4) {
+            modelAndView.setViewName("candidate/candidateForm");
+            modelAndView.addObject("candidate", candidate);
+            modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
+            modelAndView.addObject("action", "create");
+            return modelAndView;
+        }
+        
+        try {
+            candidate.getAppUser().setUserType("candidat");
+            Candidat savedCandidate = candidatService.saveCandidat(candidate);
+            return new ModelAndView("redirect:/candidates/" + savedCandidate.getIdCandidat());
+        } catch (IllegalArgumentException e) {
+            // Capture l'exception lancée quand l'email existe déjà
+            modelAndView.setViewName("candidate/candidateForm");
+            modelAndView.addObject("candidate", candidate);
+            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
+            modelAndView.addObject("action", "create");
+            return modelAndView;
+        } catch (Exception e) {
+            // Pour les autres erreurs
+            modelAndView.setViewName("candidate/candidateForm");
+            modelAndView.addObject("candidate", candidate);
+            modelAndView.addObject("error", "Une erreur est survenue lors de la création du candidat : " + e.getMessage());
+            modelAndView.addObject("action", "create");
+            return modelAndView;
+        }
     }
 
     @GetMapping("/{id}/edit")

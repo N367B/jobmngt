@@ -72,7 +72,7 @@ public class EntrepriseController {
             // Capture l'exception lancée quand l'email existe déjà
             modelAndView.setViewName("company/companyForm");
             modelAndView.addObject("company", company);
-            modelAndView.addObject("error", "Une entreprise avec cet email existe déjà.");
+            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
             modelAndView.addObject("action", "create");
             return modelAndView;
         } catch (Exception e) {

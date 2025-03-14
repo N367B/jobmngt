@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class EntrepriseServiceImpl implements EntrepriseService {
@@ -51,12 +52,13 @@ public class EntrepriseServiceImpl implements EntrepriseService {
 
     @Override
     public Entreprise saveEntreprise(Entreprise entreprise) {
-        Entreprise existingEntreprises = entrepriseDao.findByUserMail(entreprise.getAppUser().getMail());
+        // Vérifier si un utilisateur (candidat OU entreprise) avec cet email existe déjà
+        Optional<AppUser> existingUser = appUserDao.findByMail(entreprise.getAppUser().getMail());
         
-        if (existingEntreprises !=null) {
-            throw new IllegalArgumentException("Une entreprise avec cet email existe déjà.");
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur.");
         }
-
+        
         if (entreprise.getIdEntreprise() == 0) {
             entrepriseDao.persist(entreprise);
         } else {

@@ -4,6 +4,12 @@
     <header>
         <h2>Candidate entry form</h2>
     </header>
+
+    <!-- Affichage des erreurs -->
+<div th:if="${error != null}" class="alert alert-danger" role="alert">
+    <p th:text="${error}"></p>
+</div>
+
     <form th:action="@{''}" method="post">
         <fieldset class="mb-3">
             <label for="firstnameid" class="form-label">First Name</label>:
