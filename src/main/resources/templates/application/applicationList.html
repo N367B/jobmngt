@@ -2,9 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{/application/applicationBase :: article(~{::article})}">
 <article>
     <header class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Applications</h1>
-        <div th:if="${session.usertype == 'candidat'}">
-            <a th:href="@{/applications/create}" class="btn btn-success">
+        <div>
+            <a th:if="${session != null || session.usertype != null || session.usertype == 'candidat'}" th:href="@{/applications/create}" class="btn btn-success">
                 <i class="bi bi-plus-circle"></i> Submit new application
             </a>
         </div>
@@ -40,61 +39,49 @@
     </section>
 
     <div th:if="${#lists.isEmpty(applicationslist)}" class="alert alert-info">
-        No applications found.
+        No applications found. <span th:if="${session.usertype == 'candidat'}">Be the first to <a th:href="@{/applications/create}" class="alert-link">submit one</a>!</span>
     </div>
 
-    <div th:if="${not #lists.isEmpty(applicationslist)}">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Candidate</th>
-                    <th>CV</th>
-                    <th>Application Date</th>
-                    <th>Qualification</th>
-                    <th>Sectors</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="app : ${applicationslist}">
-                    <td th:text="${app.idCandidature}">1</td>
-                    <td>
-                        <a th:if="${app.candidat != null}" th:href="@{/candidates/{id}(id=${app.candidat.idCandidat})}" 
-                           th:text="${app.candidat.firstName + ' ' + app.candidat.lastName}">Candidate Name</a>
-                        <span th:unless="${app.candidat != null}">Unknown</span>
-                    </td>
-                    <td th:text="${app.cv}">CV.pdf</td>
-                    <td th:text="${#dates.format(app.appDate, 'dd-MM-yyyy')}">01-01-2025</td>
-                    <td th:text="${app.qualificationLevel != null ? app.qualificationLevel.labelQualification : ''}">Qualification</td>
-                    <td>
-                        <span th:each="sector, iterStat : ${app.sectors}">
-                            <span th:text="${sector.labelSecteur}">Sector</span>
-                            <span th:if="${!iterStat.last}">, </span>
-                        </span>
-                    </td>
-                    <td>
-                        <a th:href="@{/applications/{id}(id=${app.idCandidature})}" class="btn btn-sm btn-secondary" title="View details">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'candidat' && session.uid == app.candidat.idCandidat))}" 
-                           th:href="@{/applications/{id}/edit(id=${app.idCandidature})}" class="btn btn-sm btn-success" title="Edit">
+    <div th:if="${not #lists.isEmpty(applicationslist)}" class="row row-cols-1 row-cols-md-2 g-4">
+        <div th:each="app : ${applicationslist}" class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <span th:text="${app.candidat.firstName + ' ' + app.candidat.lastName}">Applicant Name</span>
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted" th:text="${app.cv}">CV</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-info" th:if="${app.qualificationLevel != null}" th:text="${app.qualificationLevel.labelQualification}">Qualification</span>
+                        <span th:each="sector : ${app.sectors}" class="badge bg-secondary ms-1" th:text="${sector.labelSecteur}">Sector</span>
+                    </div>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Applied on <span th:text="${#dates.format(app.appDate, 'dd-MM-yyyy')}">01-01-2025</span>
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a th:href="@{/applications/{id}(id=${app.idCandidature})}" class="btn btn-primary">View details</a>
+                    <div class="btn-group float-end" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'candidat' && session.uid == app.candidat.idCandidat))}">
+                        <a th:href="@{/applications/{id}/edit(id=${app.idCandidature})}" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'candidat' && session.uid == app.candidat.idCandidat))}" 
-                           th:href="@{/applications/{id}/delete(id=${app.idCandidature})}" class="btn btn-sm btn-danger delBtn" 
-                           title="Delete" onclick="return confirm('Are you sure you want to delete this application?');">
+                        <a th:href="@{/applications/{id}/delete(id=${app.idCandidature})}" class="btn btn-sm btn-outline-danger" 
+                           onclick="return confirm('Are you sure you want to delete this application?');">
                             <i class="bi bi-trash"></i>
                         </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <footer th:if="${session.usertype == 'candidat'}">
-        <a th:href="@{/applications/create}" class="btn btn-large btn-primary" title="submit new application">
-            <i class="bi bi-plus"></i>
+    <footer th:if="${session != null || session.usertype != null || session.usertype == 'candidat'}" class="fixed-bottom d-flex justify-content-end mb-4 me-4">
+        <a th:href="@{/applications/create}" class="btn btn-lg btn-primary rounded-circle shadow" 
+           title="Submit new application" style="width: 60px; height: 60px;">
+            <i class="bi bi-plus" style="font-size: 1.5rem;"></i>
         </a>
     </footer>
 </article>

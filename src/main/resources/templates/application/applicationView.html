@@ -10,7 +10,7 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h2>Application Details</h2>
+            <h2 th:text="${application.candidat.firstName + ' ' + application.candidat.lastName}">Applicant Name</h2>
             <div class="btn-group" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'candidat' && session.uid == application.candidat.idCandidat))}">
                 <a th:href="@{/applications/{id}/edit(id=${application.idCandidature})}" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-pencil"></i> Edit
@@ -53,6 +53,20 @@
                         <span th:text="${#dates.format(application.appDate, 'dd MMMM yyyy')}">01 January 2025</span>
                     </p>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${application.messageOffres != null && !application.messageOffres.isEmpty()}">
+        <h3>Job offer messages</h3>
+        <div class="list-group mb-4">
+            <div th:each="message : ${application.messageOffres}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1" th:text="${message.offreEmploi.title}">Job Title</h5>
+                    <small th:text="${#dates.format(message.publicationDate, 'dd-MM-yyyy')}">Date</small>
+                </div>
+                <p class="mb-1" th:text="${message.message}">Job offer message</p>
+                <a th:href="@{/jobs/{id}(id=${message.offreEmploi.idOffreEmploi})}" class="btn btn-sm btn-info">View job offer</a>
             </div>
         </div>
     </div>
