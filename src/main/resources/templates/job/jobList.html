@@ -68,6 +68,8 @@
         </div>
     </div>
     
+    <br>
+
     <footer th:if="${session != null || session.usertype != null || session.usertype == 'entreprise'}" class="fixed-bottom d-flex justify-content-end mb-4 me-4">
         <a th:href="@{/applications/create}" class="btn btn-lg btn-primary rounded-circle shadow" 
            title="Submit new application" style="width: 60px; height: 60px;">

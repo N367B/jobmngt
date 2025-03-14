@@ -27,17 +27,18 @@
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a th:href="@{candidates/{candidateId}/delete(candidateId=${cand.idCandidat})}" class="btn btn-large btn-danger delBtn"
-                        alt="Delete" title="delete candidate " data-id="@{candidates/{candidateId}/delete(candidateId=${cand.idCandidat})}" th:attrappend="title=${' ' + cand.firstName + ' ' + cand.lastName}">
+                        alt="Delete" title="delete candidate " data-id="@{candidates/{candidateId}/delete(candidateId=${cand.idCandidat})}" th:attrappend="title=${' ' + cand.firstName + ' ' + cand.lastName}" onclick="return confirm('Etes vous sur de vouloir supprimer ce candidat?');">
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>
             </tr>
         </tbody>
     </table>
-    <footer>
-        <a th:href="@{candidates/create}" class="btn btn-large btn-primary" title="add new candidate">
-            <i class="bi bi-plus"></i>
+    <footer class="fixed-bottom d-flex justify-content-end mb-4 me-4">
+        <a th:href="@{candidates/create}" class="btn btn-large btn-primary rounded-circle shadow" title="add new candidate">
+            <i class="bi bi-plus" style="font-size: 1.5rem;"></i>
         </a>
+    
 
     </footer>
 </article>

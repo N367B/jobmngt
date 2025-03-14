@@ -6,6 +6,14 @@
     </header>
     <form>
         <fieldset class="mb-3">
+            <label for="idEntreprise" class="form-label">ID</label>:
+            <input type="text" id="idEntreprise" class="form-control" name="idEntreprise" th:value="${company.idEntreprise}" readonly />
+        </fieldset>
+        <fieldset class="mb-3">
+            <label for="emailid" class="form-label">Email</label>:
+            <input type="email" id="emailid" class="form-control" name="email" th:value="${company.appUser.mail}" readonly />
+        </fieldset>
+        <fieldset class="mb-3">
             <label for="nameid" class="form-label">Name</label>:
             <input type="text" id="nameid" class="form-control" name="denomination" autofocus="autofocus"
                 th:value="${company.denomination}" readonly />
