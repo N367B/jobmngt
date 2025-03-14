@@ -9,6 +9,7 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatureService;
 import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
+import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
 import fr.atlantique.imt.inf211.jobmngt.service.QualificationLevelService;
 import fr.atlantique.imt.inf211.jobmngt.service.SectorService;
 
@@ -43,6 +44,9 @@ public class CandidatureController {
     
     @Autowired
     private SectorService sectorService;
+
+    @Autowired
+    private AuthenticationService authService;
     
     @GetMapping
     public ModelAndView listApplications() {
@@ -104,7 +108,7 @@ public class CandidatureController {
         
         return modelAndView;
     }
-
+    /*
     @GetMapping("/create")
     public ModelAndView createApplicationForm(@RequestParam(required = false) Integer jobId, HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -139,6 +143,42 @@ public class CandidatureController {
         modelAndView.addObject("action", "create");
         
         return modelAndView;
+    }*/
+
+    @GetMapping("/create")
+    public ModelAndView createApplicationForm(@RequestParam(required = false) Integer jobId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Integer uid = (Integer) session.getAttribute("uid");
+        String userType = (String) session.getAttribute("usertype");
+        
+        // Vérification que l'utilisateur est connecté et est un candidat
+        if (uid == null || !"candidat".equals(userType)) {
+            return new ModelAndView("redirect:/login");
+        }
+        
+        ModelAndView modelAndView = new ModelAndView("application/applicationForm");
+        Candidature application = new Candidature();
+        
+        // Récupérer le candidat lié à l'utilisateur connecté
+        Candidat candidat = candidatService.getCandidatById(uid);
+        application.setCandidat(candidat);
+        
+        // Si un ID d'offre d'emploi est fourni, récupérer l'offre
+        if (jobId != null) {
+            OffreEmploi job = offreEmploiService.getOffreById(jobId);
+            if (job != null) {
+                modelAndView.addObject("job", job);
+            }
+        }
+        
+        application.setAppDate(new Date());
+        
+        modelAndView.addObject("app", application);
+        modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
+        modelAndView.addObject("sectors", sectorService.listOfSectors());
+        modelAndView.addObject("action", "create");
+        
+        return modelAndView;
     }
 
     @PostMapping("/create")
@@ -155,7 +195,7 @@ public class CandidatureController {
             }
         }
         application.setSectors(sectors);
-        
+        application.setAppDate(new Date());
         // Vérifier que le CV a un nom, sinon en générer un
         if (application.getCv() == null || application.getCv().trim().isEmpty()) {
             String firstName = application.getCandidat().getFirstName();
@@ -172,12 +212,9 @@ public class CandidatureController {
 
     @GetMapping("/{id}/edit")
     public ModelAndView editApplicationForm(@PathVariable int id, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-        
-        // Vérification que l'utilisateur est connecté
-        if (uid == null) {
-            return new ModelAndView("redirect:/login");
+        // Vérification que l'utilisateur est authentifié (sans vérifier son type)
+        if (!authService.isAuthenticated(request.getSession())) {
+            return new ModelAndView("redirect:/error/403");
         }
         
         ModelAndView modelAndView = new ModelAndView("application/applicationForm");
@@ -188,68 +225,111 @@ public class CandidatureController {
             return new ModelAndView("redirect:/applications");
         }
         
-        // Vérification que l'utilisateur est le candidat concerné ou un admin
-        String userType = (String) session.getAttribute("usertype");
-        if (!"admin".equals(userType) && (application.getCandidat() == null || application.getCandidat().getIdCandidat() != uid)) {
-            return new ModelAndView("redirect:/applications");
-        }
-        
-        modelAndView.addObject("application", application);
+        modelAndView.addObject("app", application);
         modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
         modelAndView.addObject("sectors", sectorService.listOfSectors());
         modelAndView.addObject("action", "edit");
         return modelAndView;
     }
-
+    
     @PostMapping("/{id}/edit")
     public ModelAndView updateApplication(
             @PathVariable int id, 
-            @ModelAttribute Candidature application, 
-            @RequestParam("selectedSectors") List<Integer> selectedSectorIds) {
+            @ModelAttribute Candidature formApplication, 
+            @RequestParam("selectedSectors") List<Integer> selectedSectorIds,
+            HttpServletRequest request) {
         
+        formApplication.setAppDate(new Date());
+        // Afficher des informations sur l'objet reçu du formulaire
+        System.out.println("Données du formulaire reçues:");
+        System.out.println("ID: " + formApplication.getIdCandidature());
+        System.out.println("CV: " + formApplication.getCv());
+        System.out.println("Date: " + formApplication.getAppDate());
+        System.out.println("Qualification: " + (formApplication.getQualificationLevel() != null ? 
+                formApplication.getQualificationLevel().getLabelQualification() : "null"));
+        System.out.println("Secteurs: " + selectedSectorIds);
+        
+        // Récupérer l'application existante depuis la base de données
         Candidature existingApplication = candidatureService.getCandidatureById(id);
-        if (existingApplication != null) {
-            application.setIdCandidature(id);
-            
-            // Conserver les relations qui ne sont pas dans le formulaire
-            application.setCandidat(existingApplication.getCandidat());
-            
-            // Mise à jour des secteurs sélectionnés
-            Set<Sector> sectors = new HashSet<>();
-            for (Integer sectorId : selectedSectorIds) {
-                Sector sector = sectorService.getSectorById(sectorId);
-                if (sector != null) {
-                    sectors.add(sector);
-                }
-            }
-            application.setSectors(sectors);
-            
-            // Enregistrer la candidature mise à jour
-            candidatureService.saveCandidature(application);
+        
+        // Vérification que la candidature existe
+        if (existingApplication == null) {
+            System.out.println("Candidature non trouvée avec ID: " + id);
+            return new ModelAndView("redirect:/applications");
         }
-        return new ModelAndView("redirect:/applications/" + id);
+        
+        // Afficher les informations sur l'objet existant
+        System.out.println("Données existantes avant mise à jour:");
+        System.out.println("ID: " + existingApplication.getIdCandidature());
+        System.out.println("CV: " + existingApplication.getCv());
+        System.out.println("Date: " + existingApplication.getAppDate());
+        System.out.println("Qualification: " + (existingApplication.getQualificationLevel() != null ? 
+                existingApplication.getQualificationLevel().getLabelQualification() : "null"));
+        
+        // Vérification que l'utilisateur est le candidat propriétaire
+        if (!authService.checkCandidatAccess(request.getSession(), existingApplication.getCandidat().getIdCandidat())) {
+            return new ModelAndView("redirect:/error/403");
+        }
+        
+        // Mettre à jour les propriétés de l'entité existante avec les nouvelles valeurs
+        existingApplication.setAppDate(formApplication.getAppDate());
+        existingApplication.setCv(formApplication.getCv());
+        existingApplication.setQualificationLevel(formApplication.getQualificationLevel());
+        
+        // Mise à jour des secteurs sélectionnés
+        Set<Sector> sectors = new HashSet<>();
+        for (Integer sectorId : selectedSectorIds) {
+            Sector sector = sectorService.getSectorById(sectorId);
+            if (sector != null) {
+                sectors.add(sector);
+                System.out.println("Ajout du secteur: " + sector.getLabelSecteur());
+            }
+        }
+        existingApplication.setSectors(sectors);
+        
+        try {
+            // Enregistrer la candidature mise à jour
+            System.out.println("Tentative de sauvegarde...");
+            Candidature savedApplication = candidatureService.saveCandidature(existingApplication);
+            
+            // Vérifier que la sauvegarde a bien fonctionné
+            System.out.println("Sauvegarde effectuée, vérification de l'objet enregistré:");
+            System.out.println("ID: " + savedApplication.getIdCandidature());
+            System.out.println("CV: " + savedApplication.getCv());
+            System.out.println("Date: " + savedApplication.getAppDate());
+            System.out.println("Qualification: " + (savedApplication.getQualificationLevel() != null ? 
+                    savedApplication.getQualificationLevel().getLabelQualification() : "null"));
+            
+            return new ModelAndView("redirect:/applications/" + id);
+        } catch (Exception e) {
+            System.out.println("Erreur lors de la sauvegarde: " + e.getMessage());
+            e.printStackTrace();
+            
+            ModelAndView modelAndView = new ModelAndView("application/applicationForm");
+            modelAndView.addObject("app", existingApplication);
+            modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
+            modelAndView.addObject("sectors", sectorService.listOfSectors());
+            modelAndView.addObject("action", "edit");
+            modelAndView.addObject("error", "Une erreur est survenue lors de la mise à jour : " + e.getMessage());
+            return modelAndView;
+        }
     }
-
+    
     @GetMapping("/{id}/delete")
     public ModelAndView deleteApplication(@PathVariable int id, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-        String userType = (String) session.getAttribute("usertype");
-        
-        // Vérification que l'utilisateur est connecté
-        if (uid == null) {
-            return new ModelAndView("redirect:/login");
-        }
-        
         Candidature application = candidatureService.getCandidatureById(id);
-        if (application != null) {
-            // Vérification que l'utilisateur est le candidat concerné ou un admin
-            if ("admin".equals(userType) || 
-                (application.getCandidat() != null && application.getCandidat().getIdCandidat() == uid)) {
-                candidatureService.deleteCandidature(id);
-            }
+        
+        // Vérification que la candidature existe
+        if (application == null) {
+            return new ModelAndView("redirect:/applications");
         }
         
+        // Vérification que l'utilisateur est le candidat propriétaire
+        if (!authService.checkCandidatAccess(request.getSession(), application.getCandidat().getIdCandidat())) {
+            return new ModelAndView("redirect:/error/403");
+        }
+        
+        candidatureService.deleteCandidature(id);
         return new ModelAndView("redirect:/applications");
     }
 

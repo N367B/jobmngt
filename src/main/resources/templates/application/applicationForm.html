@@ -17,12 +17,12 @@
     
     <form th:action="@{''}" method="post" class="card">
         <div class="card-body">
-            <input type="hidden" name="idCandidature" th:if="${application.idCandidature > 0}" th:value="${application.idCandidature}" />
-            <input type="hidden" name="candidat.idCandidat" th:value="${application.candidat.idCandidat}" />
+            <input type="hidden" name="idCandidature" th:if="${app.idCandidature > 0}" th:value="${app.idCandidature}" />
+            <input type="hidden" name="candidat.idCandidat" th:value="${app.candidat.idCandidat}" />
             
             <fieldset class="mb-3">
                 <label for="cv" class="form-label">CV Filename</label>
-                <input type="text" id="cv" class="form-control" name="cv" th:value="${application.cv}" 
+                <input type="text" id="cv" class="form-control" name="cv" th:value="${app.cv}" 
                        placeholder="Leave blank to auto-generate a filename" />
                 <small class="form-text text-muted">
                     Note: This is just the filename. In a real application, you would upload the actual CV file.
@@ -36,7 +36,7 @@
                     <option th:each="level : ${qualificationLevels}" 
                             th:value="${level.idQualification}" 
                             th:text="${level.labelQualification}"
-                            th:selected="${application.qualificationLevel != null && application.qualificationLevel.idQualification == level.idQualification}">
+                            th:selected="${app.qualificationLevel != null && app.qualificationLevel.idQualification == level.idQualification}">
                     </option>
                 </select>
             </fieldset>
@@ -49,7 +49,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" th:id="${'sector-' + sector.idSecteur}" 
                                        name="selectedSectors" th:value="${sector.idSecteur}" 
-                                       th:checked="${application.sectors != null && application.sectors.contains(sector)}" />
+                                       th:checked="${app.sectors != null && app.sectors.contains(sector)}" />
                                 <label class="form-check-label" th:for="${'sector-' + sector.idSecteur}" th:text="${sector.labelSecteur}">
                                     Sector Name
                                 </label>
