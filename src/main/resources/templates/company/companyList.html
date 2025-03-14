@@ -26,8 +26,11 @@
                     <a th:href="@{companies/{companyId}/edit(companyId=${comp.idEntreprise})}" class="btn btn-large btn-success" alt="Edit" title="edit company">
                         <i class="bi bi-pencil"></i>
                     </a>
-                    <a th:href="@{companies/{companyId}/delete(companyId=${comp.idEntreprise})}" class="btn btn-large btn-danger delBtn"
-                        alt="Delete" title="delete company " data-id="@{companies/{companyId}/delete(companyId=${comp.idEntreprise})}" th:attrappend="title=${' ' + comp.denomination}">
+                    <a th:href="@{companies/{companyId}/delete(companyId=${comp.idEntreprise})}" 
+                        class="btn btn-large btn-danger delBtn"
+                        alt="Delete" 
+                        title="delete company"
+                        onclick="return confirm('Etes vous sur de vouloir supprimer cette entreprise?');">
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>

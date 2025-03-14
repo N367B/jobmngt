@@ -48,7 +48,7 @@ function check_login(){
 }
 
 $(document).ready(function () {
-    $('.table .delBtn').on('click', function (event) {
+    /*$('.table .delBtn').on('click', function (event) {
         event.preventDefault();
         
         // Récupérer l'ID de l'élément à supprimer
@@ -61,7 +61,7 @@ $(document).ready(function () {
         
         // Afficher la modale
         $('#deleteModal').modal();
-    });
+    });*/
 });
 
 
