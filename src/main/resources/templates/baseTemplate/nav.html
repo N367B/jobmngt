@@ -8,7 +8,7 @@
         <div class="col-2 align-self-end">
             <p th:if="${#ctx.session.uid} != null">
                 <i class="bi bi-" style="font-size: 2rem; color: white;" th:title="${#ctx.session.usertype}"
-                    th:attrappend="class=${#ctx.session.usertype=='company'?'buildings':'person'}"></i>
+                    th:attrappend="class=${#ctx.session.usertype=='entreprise'?'buildings':'person'}"></i>
                 <span th:text="${#ctx.session.user.mail}" class="tiny_text" />
             </p>
         </div>

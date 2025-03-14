@@ -25,6 +25,7 @@ public class AuthenticationService {
             session.setAttribute("uid", user.getIdUser());
             session.setAttribute("usertype", user.getUserType());
             session.setAttribute("email", user.getMail());
+            session.setAttribute("user", user);
 
             // Attributs supplémentaires selon le type d'utilisateur
             if ("entreprise".equals(user.getUserType()) && user.getEntreprise() != null) {
@@ -80,4 +81,58 @@ public class AuthenticationService {
         Integer uid = (Integer) session.getAttribute("uid");
         return uid != null && (uid == resourceOwnerId || isAdmin(session));
     }
+
+    /**
+     * Vérifie que l'utilisateur est une entreprise et qu'elle correspond à l'ID fourni
+     * @param session La session HTTP
+     * @param entrepriseId L'ID de l'entreprise à vérifier
+     * @return true si l'utilisateur est autorisé, false sinon
+     */
+    public boolean checkEntrepriseAccess(HttpSession session, int entrepriseId) {
+        Integer uid = (Integer) session.getAttribute("uid");
+        
+        // Vérification de l'authentification et du type utilisateur
+        if (uid == null || !isEntreprise(session)) {
+            return false;
+        }
+        
+        // Si admin, accès autorisé sans vérification supplémentaire
+        if (isAdmin(session)) {
+            return true;
+        }
+        
+        // Vérification que l'entreprise correspond à l'utilisateur connecté
+        return uid == entrepriseId;
+    }
+
+    /**
+     * Vérifie que l'utilisateur est un candidat et qu'il correspond à l'ID fourni
+     * @param session La session HTTP
+     * @param candidatId L'ID du candidat à vérifier
+     * @return true si l'utilisateur est autorisé, false sinon
+     */
+    public boolean checkCandidatAccess(HttpSession session, int candidatId) {
+        Integer uid = (Integer) session.getAttribute("uid");
+        
+        // Vérification de l'authentification
+        if (uid == null) {
+            return false;
+        }
+        
+        // Si admin, accès autorisé sans vérification supplémentaire
+        if (isAdmin(session)) {
+            return true;
+        }
+        
+        // Vérifier que l'utilisateur est un candidat
+        if (!isCandidat(session)) {
+            return false;
+        }
+        
+        // Pour les candidats, vérifier que l'ID correspond
+        return uid == candidatId;
+    }
+
+
+    
 }
