@@ -111,18 +111,52 @@ public class CandidatController {
 
     @PostMapping("/{id}/edit")
     public ModelAndView updateCandidate(@PathVariable int id, @ModelAttribute Candidat candidate, HttpServletRequest request) {
-
+        // Vérification des permissions
         if (!authService.checkCandidatAccess(request.getSession(), id)) {
             return new ModelAndView("redirect:/error/403");
         }
-    
+        
         Candidat existingCandidate = candidatService.getCandidatById(id);
-        if (existingCandidate != null) {
-            candidate.setIdCandidat(id);
-            candidate.getAppUser().setIdUser(existingCandidate.getAppUser().getIdUser());
-            candidatService.saveCandidat(candidate);
+        ModelAndView modelAndView = new ModelAndView();
+        
+        // Vérification du mot de passe si fourni
+        String password = candidate.getAppUser().getPassword();
+        if (password != null && !password.isEmpty()) {
+            if (password.length() < 4) {
+                modelAndView.setViewName("candidate/candidateForm");
+                modelAndView.addObject("candidate", candidate);
+                modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
+                modelAndView.addObject("action", "edit");
+                return modelAndView;
+            }
+        } else {
+            // Si aucun mot de passe n'est fourni, conserver l'ancien
+            candidate.getAppUser().setPassword(existingCandidate.getAppUser().getPassword());
         }
-        return new ModelAndView("redirect:/candidates/" + id);
+        
+        // Configuration des IDs
+        candidate.setIdCandidat(id);
+        candidate.getAppUser().setIdUser(existingCandidate.getAppUser().getIdUser());
+        candidate.getAppUser().setUserType("candidat");
+        
+        try {
+            candidatService.saveCandidat(candidate);
+            return new ModelAndView("redirect:/candidates/" + id);
+        } catch (IllegalArgumentException e) {
+            // Capture l'exception lancée quand l'email existe déjà
+            modelAndView.setViewName("candidate/candidateForm");
+            modelAndView.addObject("candidate", candidate);
+            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
+            modelAndView.addObject("action", "edit");
+            return modelAndView;
+        } catch (Exception e) {
+            // Pour les autres erreurs
+            modelAndView.setViewName("candidate/candidateForm");
+            modelAndView.addObject("candidate", candidate);
+            modelAndView.addObject("error", "Une erreur est survenue lors de la mise à jour du candidat : " + e.getMessage());
+            modelAndView.addObject("action", "edit");
+            return modelAndView;
+        }
     }
 
     @GetMapping("/{id}/delete")

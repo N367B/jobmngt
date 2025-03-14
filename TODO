@@ -30,3 +30,9 @@ NEED TO MAKE IT WORK FOR ALL CRUD AND TEST IT WELL
 THEN NEED TO WORK WITH AUTHENTICATION
 
 AND MESSAGES - MAKE SURE IT WORKS WELL !!!
+
+
+----++++++-------
+
+Make sure to have a clear limit between services and controllers !!!
+
