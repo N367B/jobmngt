@@ -53,13 +53,23 @@ public Candidat saveCandidat(Candidat candidat) {
     return candidat;
 }
 
-    @Override
-    public boolean deleteCandidat(int id) {
-        Candidat candidat = candidatDao.findById(id);
-        if (candidat != null) {
-            candidatDao.remove(candidat);
-            return true;
+@Override
+public boolean deleteCandidat(int id) {
+    // Récupérer le candidat par son ID
+    Candidat candidat = candidatDao.findById(id);
+    if (candidat != null) {
+        // Récupérer l'utilisateur associé
+        AppUser appUser = candidat.getAppUser();
+        
+        // Supprimer le candidat
+        candidatDao.remove(candidat);
+        
+        // Supprimer l'utilisateur associé si nécessaire
+        if (appUser != null) {
+            appUserDao.remove(appUser);
         }
-        return false;
+        return true;
     }
+    return false;
+}
 }
