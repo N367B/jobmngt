@@ -50,6 +50,11 @@
                     <td th:text="${job.publicationDate}" />
                     <td th:text="${job.qualificationLevel.labelQualification}" />
                     <td><span th:each="sec : ${job.sectors}"><span th:text="${sec.labelSecteur}"></span> </span></td>
+                    <td>
+                        <a th:href="@{/jobs/{jobId}(jobId=${job.idOffreEmploi})}" class="btn btn-info btn-sm" title="View details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>    
                 </tr>
             </tbody>
         </table>

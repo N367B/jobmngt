@@ -49,6 +49,12 @@
                     <td th:text="${app.appDate}" />
                     <td th:text="${app.qualificationLevel.labelQualification}" />
                     <td><span th:each="sec : ${app.sectors}"><span th:text="${sec.labelSecteur}"></span> </span></td>
+                    <td>
+                        <a th:href="@{/applications/{appId}(appId=${app.idCandidature})}" class="btn btn-info btn-sm" title="View details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>    
+
                 </tr>
             </tbody>
         </table>
