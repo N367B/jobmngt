@@ -23,6 +23,7 @@
                     <a th:href="@{candidates/}+${cand.idCandidat}" alt="Candidate details" title="view details" class="btn btn-large btn-secondary">
                         <i class="bi bi-eye"></i>
                     </a>
+                    <div class="btn-group float-end" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'candidat' && session.uid == cand.idCandidat))}">
                     <a th:href="@{candidates/{candidateId}/edit(candidateId=${cand.idCandidat})}" class="btn btn-large btn-success" alt="Edit" title="edit candidate">
                         <i class="bi bi-pencil"></i>
                     </a>
@@ -30,6 +31,7 @@
                         alt="Delete" title="delete candidate " data-id="@{candidates/{candidateId}/delete(candidateId=${cand.idCandidat})}" th:attrappend="title=${' ' + cand.firstName + ' ' + cand.lastName}" onclick="return confirm('Etes vous sur de vouloir supprimer ce candidat?');">
                         <i class="bi bi-trash"></i>
                     </a>
+                    </div>
                 </td>
             </tr>
         </tbody>

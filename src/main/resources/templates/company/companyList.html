@@ -23,6 +23,7 @@
                     <a th:href="@{companies/}+${comp.idEntreprise}" alt="Company details" title="view details" class="btn btn-large btn-secondary">
                         <i class="bi bi-eye"></i>
                     </a>
+                    <div class="btn-group float-end" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'entreprise' && session.uid == comp.idEntreprise))}">
                     <a th:href="@{/companies/{companyId}/edit(companyId=${comp.idEntreprise})}" 
                         class="btn btn-large btn-success" 
                         alt="Edit" 
@@ -36,6 +37,7 @@
                         onclick="return confirm('Etes vous sur de vouloir supprimer cette entreprise?');">
                         <i class="bi bi-trash"></i>
                     </a>
+                    </div>
                 </td>
             </tr>
         </tbody>

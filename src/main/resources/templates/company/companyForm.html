@@ -63,10 +63,9 @@
                     <td th:text="${job.title}" />
                     <td th:text="${job.taskDescription}" />
                     <td th:text="${job.publicationDate}" />
-                    <td th:text="${job.qualificationlevel.labelQualification}" />
+                    <td th:text="${job.qualificationLevel.labelQualification}" />
                     <td><span th:each="sec : ${job.sectors}"><span th:text="${sec.labelSecteur}"></span> </span></td>
-                    <td><a th:href="@{'modoffer?oid='+${job.id}}"><img th:src="@{/img/zoom.png}"
-                                alt="Job offer modification" /></a></td>
+                    <td><a th:href="@{/jobs/}+${job.idOffreEmploi}"><i class="bi bi-eye"></i></a></td>
                 </tr>
             </tbody>
         </table>

@@ -63,6 +63,15 @@
                 </div>
                 <div class="card-footer">
                     <a th:href="@{/jobs/{id}(id=${job.idOffreEmploi})}" class="btn btn-primary">View details</a>
+                    <div class="btn-group float-end" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'entreprise' && session.uid == job.entreprise.idEntreprise))}">
+                        <a th:href="@{/jobs/{id}/edit(id=${job.idOffreEmploi})}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a th:href="@{/jobs/{id}/delete(id=${job.idOffreEmploi})}" class="btn btn-sm btn-outline-danger" 
+                           onclick="return confirm('Are you sure you want to delete this job offer?');">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
