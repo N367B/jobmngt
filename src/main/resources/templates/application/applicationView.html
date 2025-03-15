@@ -78,7 +78,17 @@
                         <a th:href="@{/candidates/{id}(id=${applicationDTO.idCandidat})}" 
                            th:text="${applicationDTO.candidatFirstName + ' ' + applicationDTO.candidatLastName}">Candidate Name</a>
                     </p>
+                    <p>
+                    <a th:href="'mailto:' + ${applicationDTO.mail}" th:text="${applicationDTO.mail}">mail</a></p>
                     <p th:text="${applicationDTO.candidatCity}">City</p>
+                    <p>
+                        <strong>ID:</strong>
+                        <span th:text="${applicationDTO.idCandidature}">12345</span>
+                    </p>
+                    <p>
+                        <strong>Applied on:</strong>
+                        <span th:text="${#dates.format(applicationDTO.appDate, 'dd MMMM yyyy')}">01 January 2025</span>
+                    </p>
                 </div>
                 <div class="col-md-6">
                     <h4>Application Details</h4>
@@ -97,22 +107,22 @@
                             <span th:if="${!iterStat.last}">, </span>
                         </span>
                     </p>
-                    <!-- ... -->
+
                 </div>
             </div>
         </div>
     </div>
     
     <div th:if="${application.messageOffres != null && !application.messageOffres.isEmpty()}">
-        <h3>Job offer messages</h3>
+        <h3>Application offer messages</h3>
         <div class="list-group mb-4">
             <div th:each="message : ${application.messageOffres}" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1" th:text="${message.offreEmploi.title}">Job Title</h5>
+                    <h5 class="mb-1" th:text="${message.offreEmploi.title}">Application Title</h5>
                     <small th:text="${#dates.format(message.publicationDate, 'dd-MM-yyyy')}">Date</small>
                 </div>
-                <p class="mb-1" th:text="${message.message}">Job offer message</p>
-                <a th:href="@{/jobs/{id}(id=${message.offreEmploi.idOffreEmploi})}" class="btn btn-sm btn-info">View job offer</a>
+                <p class="mb-1" th:text="${message.message}">Application offer message</p>
+                <a th:href="@{/applications/{id}(id=${message.offreEmploi.idOffreEmploi})}" class="btn btn-sm btn-info">View Application offer</a>
             </div>
         </div>
     </div>

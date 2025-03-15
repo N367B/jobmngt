@@ -45,12 +45,16 @@
     <div th:if="${not #lists.isEmpty(applicationslist)}" class="row row-cols-1 row-cols-md-2 g-4">
         <div th:each="app : ${applicationslist}" class="col">
             <div class="card h-100">
-                <div class="card-header">
+                <div class="card-header position-relative">
+                    <small class="position-absolute top-0 end-0 mt-1 me-2 text-muted" 
+                           style="font-size: 0.7rem;" th:text="'#' + ${app.idCandidature}">
+                        #123
+                    </small>
                     <h5 class="card-title">
                         <span th:text="${app.candidat.firstName + ' ' + app.candidat.lastName}">Applicant Name</span>
                     </h5>
                     <h6 class="card-subtitle mb-2 text-muted" th:text="${app.cv}">CV</h6>
-                </div>
+                </div>            
                 <div class="card-body">
                     <div class="mb-2">
                         <span class="badge bg-info" th:if="${app.qualificationLevel != null}" th:text="${app.qualificationLevel.labelQualification}">Qualification</span>

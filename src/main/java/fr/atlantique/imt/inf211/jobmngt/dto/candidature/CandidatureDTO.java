@@ -20,6 +20,7 @@ public class CandidatureDTO {
     private String qualificationLabel;
     private Set<String> sectorLabels;
     private List<MessageOffreDTO> messages;
+    private String mail;
     
     public CandidatureDTO(Candidature candidature) {
         this.idCandidature = candidature.getIdCandidature();
@@ -33,6 +34,7 @@ public class CandidatureDTO {
             
             if (candidature.getCandidat().getAppUser() != null) {
                 this.candidatCity = candidature.getCandidat().getAppUser().getCity();
+                this.mail = candidature.getCandidat().getAppUser().getMail();
             }
         }
         
@@ -64,6 +66,7 @@ public class CandidatureDTO {
     public String getQualificationLabel() { return qualificationLabel; }
     public Set<String> getSectorLabels() { return sectorLabels; }
     public List<MessageOffreDTO> getMessages() { return messages; }
+    public String getMail() { return mail; }
     
     // DTO imbriqué pour MessageOffre
     public static class MessageOffreDTO {

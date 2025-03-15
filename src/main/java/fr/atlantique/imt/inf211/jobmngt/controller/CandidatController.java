@@ -71,7 +71,8 @@ public class CandidatController {
         try {
             candidate.getAppUser().setUserType("candidat");
             Candidat savedCandidate = candidatService.saveCandidat(candidate);
-            return new ModelAndView("redirect:/candidates/" + savedCandidate.getIdCandidat());
+            //return new ModelAndView("redirect:/candidates/" + savedCandidate.getIdCandidat());
+            return new ModelAndView("redirect:/candidates");
         } catch (IllegalArgumentException e) {
             // Capture l'exception lancée quand l'email existe déjà
             modelAndView.setViewName("candidate/candidateForm");

@@ -45,11 +45,16 @@
     <div th:if="${not #lists.isEmpty(jobslist)}" class="row row-cols-1 row-cols-md-2 g-4">
         <div th:each="job : ${jobslist}" class="col">
             <div class="card h-100">
-                <div class="card-header">
+                <div class="card-header position-relative">
+                    <!-- Ajout de l'ID en petit, dans le coin supérieur droit -->
+                    <small class="position-absolute top-0 end-0 mt-1 me-2 text-muted" 
+                           style="font-size: 0.7rem;" th:text="'#' + ${job.idOffreEmploi}">
+                        #123
+                    </small>
                     <h5 class="card-title" th:text="${job.title}">Job Title</h5>
                     <h6 class="card-subtitle mb-2 text-muted" th:if="${job.entreprise != null}" th:text="${job.entreprise.denomination}">Company</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body">        
                     <p class="card-text" th:text="${#strings.abbreviate(job.taskDescription, 150)}">Description</p>
                     <div class="mb-2">
                         <span class="badge bg-info" th:if="${job.qualificationLevel != null}" th:text="${job.qualificationLevel.labelQualification}">Qualification</span>

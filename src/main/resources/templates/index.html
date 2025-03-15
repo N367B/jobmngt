@@ -48,6 +48,89 @@
 		</article>
 	</div>
 
+	<!-- Partie à ajouter au template index.html pour les entreprises -->
+<div th:if="${session.uid != null && session.usertype == 'entreprise' && userOffers != null}">
+    <h2>Vos offres d'emploi</h2>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Titre</th>
+                    <th>Description des tâches</th>
+                    <th>Secteurs d'activité</th>
+                    <th>Qualification requise</th>
+                    <th>Date de dépôt</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="offre : ${userOffers}">
+                    <td th:text="${offre.idOffreEmploi}"></td>
+                    <td th:text="${offre.title}"></td>
+                    <td th:text="${#strings.abbreviate(offre.taskDescription, 50)}"></td>
+                    <td>
+                        <span th:each="sector,iterStat : ${offre.sectors}" th:text="${sector.labelSecteur + (!iterStat.last ? ', ' : '')}"></span>
+                    </td>
+                    <td th:text="${offre.qualificationLevel.labelQualification}"></td>
+                    <td th:text="${#dates.format(offre.publicationDate, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <a th:href="@{/jobs/{id}(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>
+                        <a th:href="@{/jobs/{id}/edit(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                        <a th:href="@{/jobs/{id}/delete(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette offre?')">
+                           <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <a th:href="@{/jobs/create}" class="btn btn-primary">Créer une nouvelle offre</a>
+</div>
+
+<!-- Partie à ajouter au template index.html pour les candidats -->
+<div th:if="${session.uid != null && session.usertype == 'candidat' && userCandidate != null}">
+    <h2>Vos candidatures</h2>
+    <div class="table-responsive" th:if="${!userCandidate.candidatures.isEmpty()}">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>CV</th>
+                    <th>Secteurs d'activité</th>
+                    <th>Qualification</th>
+                    <th>Date de candidature</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="candidature : ${userCandidate.candidatures}">
+                    <td th:text="${candidature.idCandidature}"></td>
+                    <td th:text="${candidature.cv}"></td>
+                    <td>
+                        <span th:each="sector,iterStat : ${candidature.sectors}" th:text="${sector.labelSecteur + (!iterStat.last ? ', ' : '')}"></span>
+                    </td>
+                    <td th:text="${candidature.qualificationLevel.labelQualification}"></td>
+                    <td th:text="${#dates.format(candidature.appDate, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <a th:href="@{/applications/{id}(id=${candidature.idCandidature})}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>
+                        <a th:href="@{/applications/{id}/edit(id=${candidature.idCandidature})}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                        <a th:href="@{/applications/{id}/delete(id=${candidature.idCandidature})}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette candidature?')">
+                           <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:if="${userCandidate.candidatures.isEmpty()}" class="alert alert-info">
+        Vous n'avez pas encore de candidatures.
+    </div>
+    <a th:href="@{/applications/create}" class="btn btn-primary">Créer une nouvelle candidature</a>
+</div>
+
 </section>
 
 </html>

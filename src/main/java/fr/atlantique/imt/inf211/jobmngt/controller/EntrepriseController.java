@@ -71,7 +71,8 @@ public class EntrepriseController {
         try {
             company.getAppUser().setUserType("entreprise");
             Entreprise savedCompany = entrepriseService.saveEntreprise(company);
-            return new ModelAndView("redirect:/companies/" + savedCompany.getIdEntreprise());
+            //return new ModelAndView("redirect:/companies/" + savedCompany.getIdEntreprise());
+            return new ModelAndView("redirect:/companies");
         } catch (IllegalArgumentException e) {
             // Capture l'exception lancée quand l'email existe déjà
             modelAndView.setViewName("company/companyForm");
