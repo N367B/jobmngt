@@ -98,12 +98,32 @@ public class CandidatureServiceImpl implements CandidatureService {
     
     @Override
     public List<Candidature> searchCandidatures(String secteurLabel, String qualificationLabel) {
-        Sector sector = sectorDao.findByLabel(secteurLabel);
-        QualificationLevel qualification = qualificationLevelDao.findByLabel(qualificationLabel);
-        
-        if (sector != null && qualification != null) {
-            return candidatureDao.findBySectorAndQualificationLevel(sector, qualification);
+        // Cas 1: Les deux critères sont renseignés
+        if (secteurLabel != null && !secteurLabel.isEmpty() 
+                && qualificationLabel != null && !qualificationLabel.isEmpty()) {
+            Sector sector = sectorDao.findByLabel(secteurLabel);
+            QualificationLevel qualification = qualificationLevelDao.findByLabel(qualificationLabel);
+            
+            if (sector != null && qualification != null) {
+                return candidatureDao.findBySectorAndQualificationLevel(sector, qualification);
+            }
         }
+        // Cas 2: Uniquement le secteur est renseigné
+        else if (secteurLabel != null && !secteurLabel.isEmpty()) {
+            Sector sector = sectorDao.findByLabel(secteurLabel);
+            if (sector != null) {
+                return candidatureDao.findBySector(sector);
+            }
+        }
+        // Cas 3: Uniquement la qualification est renseignée
+        else if (qualificationLabel != null && !qualificationLabel.isEmpty()) {
+            QualificationLevel qualification = qualificationLevelDao.findByLabel(qualificationLabel);
+            if (qualification != null) {
+                return candidatureDao.findByQualificationLevel(qualification);
+            }
+        }
+        
+        // Si aucun critère valide n'est fourni, retourner la liste complète
         return listCandidatures();
     }
 }

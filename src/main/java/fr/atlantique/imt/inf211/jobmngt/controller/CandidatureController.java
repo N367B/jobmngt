@@ -332,7 +332,7 @@ public class CandidatureController {
         candidatureService.deleteCandidature(id);
         return new ModelAndView("redirect:/applications");
     }
-
+    /*
     @GetMapping("/search")
     public ModelAndView searchApplications(
             @RequestParam(required = false) String sector, 
@@ -347,6 +347,37 @@ public class CandidatureController {
             applications = candidatureService.listCandidatures();
         }
         
+        modelAndView.addObject("applicationslist", applications);
+        modelAndView.addObject("sectors", sectorService.listOfSectors());
+        modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
+        modelAndView.addObject("selectedSector", sector);
+        modelAndView.addObject("selectedQualification", qualification);
+        
+        return modelAndView;}
+    */
+    @GetMapping("/search")
+    public ModelAndView searchApplications(
+            @RequestParam(required = false) String sector, 
+            @RequestParam(required = false) String qualification) {
+        
+        // Nettoyage des paramètres
+        if (sector != null && sector.trim().isEmpty()) {
+            sector = null;
+        }
+        if (qualification != null && qualification.trim().isEmpty()) {
+            qualification = null;
+        }
+        
+        // Vérification des valeurs des paramètres (pour débogage)
+        System.out.println("Recherche - Secteur: " + sector + ", Qualification: " + qualification);
+        
+        // Utilisation du service pour effectuer la recherche
+        List<Candidature> applications = candidatureService.searchCandidatures(sector, qualification);
+        
+        // Vérification du nombre de résultats (pour débogage)
+        System.out.println("Nombre de résultats: " + applications.size());
+        
+        ModelAndView modelAndView = new ModelAndView("application/applicationList");
         modelAndView.addObject("applicationslist", applications);
         modelAndView.addObject("sectors", sectorService.listOfSectors());
         modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());

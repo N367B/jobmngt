@@ -209,7 +209,7 @@ public class OffreController {
         offreEmploiService.deleteOffre(id);
         return new ModelAndView("redirect:/jobs");
     }
-
+    /*
     @GetMapping("/search")
     public ModelAndView searchJobs(@RequestParam(required = false) String sector, 
                                   @RequestParam(required = false) String qualification) {
@@ -227,6 +227,38 @@ public class OffreController {
         modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
         modelAndView.addObject("selectedSector", sector);
         modelAndView.addObject("selectedQualification", qualification);
+        return modelAndView;
+    }*/
+
+    @GetMapping("/search")
+    public ModelAndView searchJobs(
+            @RequestParam(required = false) String sector, 
+            @RequestParam(required = false) String qualification) {
+        // Nettoyage des paramètres
+        if (sector != null && sector.trim().isEmpty()) {
+            sector = null;
+        }
+        if (qualification != null && qualification.trim().isEmpty()) {
+            qualification = null;
+        }
+        
+        // Vérifiez ici les valeurs des paramètres
+        System.out.println("Recherche - Secteur: " + sector + ", Qualification: " + qualification);
+        
+        List<OffreEmploi> jobs = offreEmploiService.searchOffres(sector, qualification);
+        
+        // Vérifiez le nombre de résultats
+        System.out.println("Nombre de résultats: " + jobs.size());
+        
+        ModelAndView modelAndView = new ModelAndView("job/jobList");
+        modelAndView.addObject("jobslist", jobs);  // Utiliser "jobslist" au lieu de "jobs"
+        
+        // Ajouter ces attributs pour que les filtres de recherche fonctionnent
+        modelAndView.addObject("sectors", sectorService.listOfSectors());
+        modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
+        modelAndView.addObject("selectedSector", sector);
+        modelAndView.addObject("selectedQualification", qualification);
+        
         return modelAndView;
     }
 }

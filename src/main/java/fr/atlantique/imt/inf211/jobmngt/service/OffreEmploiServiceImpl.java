@@ -40,34 +40,55 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     @Override
     public List<OffreEmploi> searchOffres(String secteurParam, String qualificationParam) {
         try {
-            Sector sector = null;
-            QualificationLevel qualificationLevel = null;
-            
-            // Tenter de parser comme des IDs
-            try {
-                int idSecteur = Integer.parseInt(secteurParam);
-                sector = sectorDao.findById(idSecteur);
-            } catch (NumberFormatException e) {
-                // Ce n'est pas un ID, on cherche par label
-                sector = sectorDao.findByLabel(secteurParam);
+            // Cas 1: Les deux critères sont renseignés
+            if (secteurParam != null && !secteurParam.isEmpty() 
+                    && qualificationParam != null && !qualificationParam.isEmpty()) {
+                Sector sector = getSectorFromParam(secteurParam);
+                QualificationLevel qualificationLevel = getQualificationFromParam(qualificationParam);
+                
+                if (sector != null && qualificationLevel != null) {
+                    return offreEmploiDao.findBySectorAndQualificationLevel(sector, qualificationLevel);
+                }
+            }
+            // Cas 2: Uniquement le secteur est renseigné
+            else if (secteurParam != null && !secteurParam.isEmpty()) {
+                Sector sector = getSectorFromParam(secteurParam);
+                if (sector != null) {
+                    return offreEmploiDao.findBySector(sector);
+                }
+            }
+            // Cas 3: Uniquement la qualification est renseignée
+            else if (qualificationParam != null && !qualificationParam.isEmpty()) {
+                QualificationLevel qualificationLevel = getQualificationFromParam(qualificationParam);
+                if (qualificationLevel != null) {
+                    return offreEmploiDao.findByQualificationLevel(qualificationLevel);
+                }
             }
             
-            try {
-                int idQualification = Integer.parseInt(qualificationParam);
-                qualificationLevel = qualificationLevelDao.findById(idQualification);
-            } catch (NumberFormatException e) {
-                // Ce n'est pas un ID, on cherche par label
-                qualificationLevel = qualificationLevelDao.findByLabel(qualificationParam);
-            }
-            
-            if (sector == null || qualificationLevel == null) {
-                return Collections.emptyList();
-            }
-            
-            return offreEmploiDao.findBySectorAndQualificationLevel(sector, qualificationLevel);
+            // Si aucun critère valide n'est fourni ou erreur, retourner la liste complète
+            return listOffres();
         } catch (Exception e) {
             e.printStackTrace();
-            return Collections.emptyList();
+            return listOffres();
+        }
+    }
+    
+    // Méthodes utilitaires pour extraire les entités à partir des paramètres
+    private Sector getSectorFromParam(String param) {
+        try {
+            int id = Integer.parseInt(param);
+            return sectorDao.findById(id);
+        } catch (NumberFormatException e) {
+            return sectorDao.findByLabel(param);
+        }
+    }
+    
+    private QualificationLevel getQualificationFromParam(String param) {
+        try {
+            int id = Integer.parseInt(param);
+            return qualificationLevelDao.findById(id);
+        } catch (NumberFormatException e) {
+            return qualificationLevelDao.findByLabel(param);
         }
     }
 

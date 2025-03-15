@@ -136,4 +136,40 @@ public class CandidatureDao {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<Candidature> findBySector(Sector sector) {
+        logger.log(Level.INFO, "getting Candidature instances with sector: " + sector);
+        try {
+            List<Candidature> instances = entityManager.createQuery(
+                "SELECT c FROM Candidature c JOIN c.sectors s WHERE s = :sector", 
+                Candidature.class)
+                .setParameter("sector", sector)
+                .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Candidature> findByQualificationLevel(QualificationLevel qualificationLevel) {
+        logger.log(Level.INFO, "getting Candidature instances with qualification level: " + qualificationLevel);
+        try {
+            List<Candidature> instances = entityManager.createQuery(
+                "SELECT c FROM Candidature c WHERE c.qualificationLevel = :qualificationLevel", 
+                Candidature.class)
+                .setParameter("qualificationLevel", qualificationLevel)
+                .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+}
+
 }

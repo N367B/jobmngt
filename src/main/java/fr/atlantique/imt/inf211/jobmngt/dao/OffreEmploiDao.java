@@ -123,5 +123,41 @@ public class OffreEmploiDao {
             throw re;
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<OffreEmploi> findBySector(Sector sector) {
+        logger.log(Level.INFO, "getting OffreEmploi instances with sector: " + sector);
+        try {
+            List<OffreEmploi> instances = entityManager.createQuery(
+                "SELECT o FROM OffreEmploi o JOIN o.sectors s WHERE s = :sector", 
+                OffreEmploi.class)
+                .setParameter("sector", sector)
+                .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<OffreEmploi> findByQualificationLevel(QualificationLevel qualificationLevel) {
+        logger.log(Level.INFO, "getting OffreEmploi instances with qualification level: " + qualificationLevel);
+        try {
+            List<OffreEmploi> instances = entityManager.createQuery(
+                "SELECT o FROM OffreEmploi o WHERE o.qualificationLevel = :qualificationLevel", 
+                OffreEmploi.class)
+                .setParameter("qualificationLevel", qualificationLevel)
+                .getResultList();
+            logger.log(Level.INFO, "get successful");
+            return instances;
+        }
+        catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
 }
 
