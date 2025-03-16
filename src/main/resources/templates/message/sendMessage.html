@@ -9,7 +9,7 @@
     </nav>
 
     <!-- Formulaire pour candidat qui envoie un message concernant une offre -->
-    <div th:if="${isCandidat && offre != null}" class="card mb-4">
+    <div th:if="${isCandidat != null && isCandidat && offre != null}" class="card mb-4">
         <div class="card-header">
             <h2>Envoyer un message concernant l'offre</h2>
             <p class="text-muted">
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Formulaire pour entreprise qui envoie un message concernant une offre -->
-    <div th:if="${isEntreprise && offre != null}" class="card mb-4">
+    <div th:if="${isEntreprise != null && isEntreprise && offre != null}" class="card mb-4">
         <div class="card-header">
             <h2>Envoyer un message concernant votre offre</h2>
             <p class="text-muted">
@@ -74,7 +74,7 @@
     </div>
 
     <!-- Formulaire pour candidat qui envoie un message concernant sa candidature -->
-    <div th:if="${isCandidat && candidature != null}" class="card mb-4">
+    <div th:if="${isCandidat != null && isCandidat && candidature != null}" class="card mb-4">
         <div class="card-header">
             <h2>Envoyer un message concernant votre candidature</h2>
             <p class="text-muted">
@@ -107,7 +107,7 @@
     </div>
 
     <!-- Formulaire pour entreprise qui envoie un message concernant une candidature -->
-    <div th:if="${isEntreprise && candidature != null}" class="card mb-4">
+    <div th:if="${isEntreprise != null && isEntreprise && candidature != null}" class="card mb-4">
         <div class="card-header">
             <h2>Envoyer un message concernant une candidature</h2>
             <p class="text-muted">

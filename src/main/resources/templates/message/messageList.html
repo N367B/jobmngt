@@ -29,37 +29,41 @@
                 <!-- Messages reçus -->
                 <h4>Messages reçus</h4>
                 <div class="list-group mb-4">
-                    <div th:if="${#lists.isEmpty(__${receivedMessages_ + candidature.idCandidature}__)}">
-                        <p class="text-muted">Aucun message reçu pour cette candidature.</p>
-                    </div>
-                    <a th:each="message : ${__${receivedMessages_ + candidature.idCandidature}__}" 
-                       th:href="@{/messages/offre/{id}(id=${message.idMessageOffre})}"
-                       class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">De: <span th:text="${message.offreEmploi.entreprise.denomination}">Entreprise</span></h5>
-                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                    <div th:with="receivedVarName=${'receivedMessages_' + candidature.idCandidature}">
+                        <div th:if="${#lists.isEmpty(__${receivedVarName}__)}">
+                            <p class="text-muted">Aucun message reçu pour cette candidature.</p>
                         </div>
-                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
-                        <small>Offre: <span th:text="${message.offreEmploi.title}">Titre de l'offre</span></small>
-                    </a>
+                        <a th:each="message : ${__${receivedVarName}__}" 
+                           th:href="@{/messages/offre/{id}(id=${message.idMessageOffre})}"
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">De: <span th:text="${message.offreEmploi.entreprise.denomination}">Entreprise</span></h5>
+                                <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                            </div>
+                            <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                            <small>Offre: <span th:text="${message.offreEmploi.title}">Titre de l'offre</span></small>
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- Messages envoyés -->
                 <h4>Messages envoyés</h4>
                 <div class="list-group">
-                    <div th:if="${#lists.isEmpty(__${sentMessages_ + candidature.idCandidature}__)}">
-                        <p class="text-muted">Aucun message envoyé pour cette candidature.</p>
-                    </div>
-                    <a th:each="message : ${__${sentMessages_ + candidature.idCandidature}__}"
-                       th:href="@{/messages/candidature/{id}(id=${message.idMessageCandidature})}" 
-                       class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">À: <span th:text="${message.offreEmploi.entreprise.denomination}">Entreprise</span></h5>
-                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                    <div th:with="sentVarName=${'sentMessages_' + candidature.idCandidature}">
+                        <div th:if="${#lists.isEmpty(__${sentVarName}__)}">
+                            <p class="text-muted">Aucun message envoyé pour cette candidature.</p>
                         </div>
-                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
-                        <small>Offre: <span th:text="${message.offreEmploi.title}">Titre de l'offre</span></small>
-                    </a>
+                        <a th:each="message : ${__${sentVarName}__}"
+                           th:href="@{/messages/candidature/{id}(id=${message.idMessageCandidature})}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">À: <span th:text="${message.offreEmploi.entreprise.denomination}">Entreprise</span></h5>
+                                <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                            </div>
+                            <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                            <small>Offre: <span th:text="${message.offreEmploi.title}">Titre de l'offre</span></small>
+                        </a>
+                    </div>
                 </div>
             </div>
             
@@ -97,37 +101,41 @@
                 <!-- Messages reçus -->
                 <h4>Messages reçus</h4>
                 <div class="list-group mb-4">
-                    <div th:if="${#lists.isEmpty(__${receivedMessages_ + offre.idOffreEmploi}__)}">
-                        <p class="text-muted">Aucun message reçu pour cette offre.</p>
-                    </div>
-                    <a th:each="message : ${__${receivedMessages_ + offre.idOffreEmploi}__}"
-                       th:href="@{/messages/candidature/{id}(id=${message.idMessageCandidature})}" 
-                       class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">De: <span th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">Candidat</span></h5>
-                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                    <div th:with="receivedVarName=${'receivedMessages_' + offre.idOffreEmploi}">
+                        <div th:if="${#lists.isEmpty(__${receivedVarName}__)}">
+                            <p class="text-muted">Aucun message reçu pour cette offre.</p>
                         </div>
-                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
-                        <small>Candidature #<span th:text="${message.candidature.idCandidature}">123</span></small>
-                    </a>
+                        <a th:each="message : ${__${receivedVarName}__}"
+                           th:href="@{/messages/candidature/{id}(id=${message.idMessageCandidature})}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">De: <span th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">Candidat</span></h5>
+                                <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                            </div>
+                            <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                            <small>Candidature #<span th:text="${message.candidature.idCandidature}">123</span></small>
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- Messages envoyés -->
                 <h4>Messages envoyés</h4>
                 <div class="list-group">
-                    <div th:if="${#lists.isEmpty(__${sentMessages_ + offre.idOffreEmploi}__)}">
-                        <p class="text-muted">Aucun message envoyé pour cette offre.</p>
-                    </div>
-                    <a th:each="message : ${__${sentMessages_ + offre.idOffreEmploi}__}"
-                       th:href="@{/messages/offre/{id}(id=${message.idMessageOffre})}" 
-                       class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">À: <span th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">Candidat</span></h5>
-                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                    <div th:with="sentVarName=${'sentMessages_' + offre.idOffreEmploi}">
+                        <div th:if="${#lists.isEmpty(__${sentVarName}__)}">
+                            <p class="text-muted">Aucun message envoyé pour cette offre.</p>
                         </div>
-                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
-                        <small>Candidature #<span th:text="${message.candidature.idCandidature}">123</span></small>
-                    </a>
+                        <a th:each="message : ${__${sentVarName}__}"
+                           th:href="@{/messages/offre/{id}(id=${message.idMessageOffre})}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">À: <span th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">Candidat</span></h5>
+                                <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                            </div>
+                            <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                            <small>Candidature #<span th:text="${message.candidature.idCandidature}">123</span></small>
+                        </a>
+                    </div>
                 </div>
             </div>
             
