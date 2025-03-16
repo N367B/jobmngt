@@ -4,6 +4,7 @@ import fr.atlantique.imt.inf211.jobmngt.dao.CandidatureDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.QualificationLevelDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.SectorDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
+import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 
@@ -126,4 +127,31 @@ public class CandidatureServiceImpl implements CandidatureService {
         // Si aucun critère valide n'est fourni, retourner la liste complète
         return listCandidatures();
     }
+
+    @Override
+    public List<Candidature> getMatchingCandidatures(OffreEmploi offre) {
+        return candidatureDao.findMatchingOffreEmploi(offre);
+    }
+
+    @Override
+    public boolean isMatchingOffreEmploi(Candidature candidature, OffreEmploi offre) {
+        // Une candidature correspond à une offre si:
+        // 1. Ils ont le même niveau de qualification
+        // 2. Ils ont au moins un secteur en commun
+        if (candidature.getQualificationLevel().getIdQualification() != offre.getQualificationLevel().getIdQualification()) {
+            return false;
+        }
+        
+        // Vérifier s'il y a au moins un secteur en commun
+        for (Sector candidatureSector : candidature.getSectors()) {
+            for (Sector offreSector : offre.getSectors()) {
+                if (candidatureSector.getIdSecteur() == offreSector.getIdSecteur()) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
 }

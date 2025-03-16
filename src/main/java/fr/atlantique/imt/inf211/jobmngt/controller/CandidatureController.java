@@ -153,7 +153,7 @@ public class CandidatureController {
         
         // Vérification que l'utilisateur est connecté et est un candidat
         if (uid == null || !"candidat".equals(userType)) {
-            return new ModelAndView("redirect:/login");
+            return new ModelAndView("redirect:/error/403");
         }
         
         ModelAndView modelAndView = new ModelAndView("application/applicationForm");

@@ -1,6 +1,8 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
+import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
+
 import java.util.List;
 
 public interface CandidatureService {
@@ -16,4 +18,9 @@ public interface CandidatureService {
     boolean deleteCandidature(int id);
     
     List<Candidature> searchCandidatures(String secteur, String qualification);
+
+    List<Candidature> getMatchingCandidatures(OffreEmploi offre);
+    boolean isMatchingOffreEmploi(Candidature candidature, OffreEmploi offre);
+
+
 }

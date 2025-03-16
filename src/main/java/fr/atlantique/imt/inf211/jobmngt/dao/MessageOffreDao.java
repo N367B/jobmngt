@@ -3,6 +3,7 @@ package fr.atlantique.imt.inf211.jobmngt.dao;
 // Generated 9 mars 2025, 15:48:50 by Hibernate Tools 5.6.15.Final
 
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.persistence.EntityManager;
@@ -75,5 +76,38 @@ public class MessageOffreDao {
             throw re;
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<MessageOffre> findByCandidature(Candidature candidature) {
+        logger.log(Level.INFO, "getting MessageOffre for candidature: " + candidature.getIdCandidature());
+        try {
+            List<MessageOffre> messages = entityManager.createQuery(
+                "SELECT m FROM MessageOffre m WHERE m.candidature = :candidature", 
+                MessageOffre.class)
+                .setParameter("candidature", candidature)
+                .getResultList();
+            return messages;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<MessageOffre> findByOffreEmploi(OffreEmploi offreEmploi) {
+        logger.log(Level.INFO, "getting MessageOffre for offreEmploi: " + offreEmploi.getIdOffreEmploi());
+        try {
+            List<MessageOffre> messages = entityManager.createQuery(
+                "SELECT m FROM MessageOffre m WHERE m.offreEmploi = :offreEmploi", 
+                MessageOffre.class)
+                .setParameter("offreEmploi", offreEmploi)
+                .getResultList();
+            return messages;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
+
 }
 

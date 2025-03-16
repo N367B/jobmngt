@@ -1,5 +1,6 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
+import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
@@ -16,4 +17,6 @@ public interface OffreEmploiService {
     long countOffres();
     OffreEmploi saveOffre(OffreEmploi offre);
     boolean deleteOffre(int id);
+    List<OffreEmploi> getMatchingOffres(Candidature candidature);
+    boolean isMatchingCandidature(OffreEmploi offre, Candidature candidature);
 }

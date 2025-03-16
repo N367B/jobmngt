@@ -159,5 +159,27 @@ public class OffreEmploiDao {
             throw re;
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<OffreEmploi> findMatchingCandidature(Candidature candidature) {
+        logger.log(Level.INFO, "getting matching OffreEmploi for candidature: " + candidature.getIdCandidature());
+        try {
+            // Cette requête trouve les offres qui partagent au moins un secteur et ont le même niveau de qualification
+            String jpql = "SELECT DISTINCT o FROM OffreEmploi o " +
+                        "JOIN o.sectors os " +
+                        "JOIN :candidatureSectors cs " +
+                        "WHERE os = cs " +
+                        "AND o.qualificationLevel = :qualificationLevel";
+            
+            List<OffreEmploi> offres = entityManager.createQuery(jpql, OffreEmploi.class)
+                .setParameter("candidatureSectors", candidature.getSectors())
+                .setParameter("qualificationLevel", candidature.getQualificationLevel())
+                .getResultList();
+            return offres;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
 }
 

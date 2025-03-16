@@ -170,6 +170,27 @@ public class CandidatureDao {
             logger.log(Level.SEVERE, "get failed", re);
             throw re;
         }
-}
+    }
+
+    @Transactional(readOnly = true)
+    public List<Candidature> findMatchingOffreEmploi(OffreEmploi offreEmploi) {
+        logger.log(Level.INFO, "getting matching Candidature for offreEmploi: " + offreEmploi.getIdOffreEmploi());
+        try {
+            // Requête pour trouver les candidatures correspondant à une offre
+            String jpql = "SELECT DISTINCT c FROM Candidature c " +
+                        "JOIN c.sectors cs " +
+                        "WHERE cs IN :offreSectors " +
+                        "AND c.qualificationLevel = :qualificationLevel";
+            
+            List<Candidature> candidatures = entityManager.createQuery(jpql, Candidature.class)
+                .setParameter("offreSectors", offreEmploi.getSectors())
+                .setParameter("qualificationLevel", offreEmploi.getQualificationLevel())
+                .getResultList();
+            return candidatures;
+        } catch (RuntimeException re) {
+            logger.log(Level.SEVERE, "get failed", re);
+            throw re;
+        }
+    }
 
 }

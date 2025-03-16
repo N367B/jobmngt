@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/message/messageBase :: article(~{::article})}">
+<article>
+    <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${param.sent}">
+        <strong>Succès!</strong> Votre message a été envoyé avec succès.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Section Candidat -->
+    <div th:if="${isCandidat}" class="mb-5">
+        <h2>Mes messages par candidature</h2>
+        
+        <div th:each="candidature : ${candidat.candidatures}" class="card mb-4">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Candidature #<span th:text="${candidature.idCandidature}">123</span></h3>
+                    <span class="badge bg-primary" th:text="${candidature.qualificationLevel.labelQualification}">Qualification</span>
+                </div>
+                <p class="mb-0 text-muted">
+                    <small>Secteurs: 
+                        <span th:each="sector, iter : ${candidature.sectors}">
+                            <span th:text="${sector.labelSecteur + (!iter.last ? ', ' : '')}">Secteur</span>
+                        </span>
+                    </small>
+                </p>
+            </div>
+            
+            <div class="card-body">
+                <!-- Messages reçus -->
+                <h4>Messages reçus</h4>
+                <div class="list-group mb-4">
+                    <div th:if="${#lists.isEmpty(__${receivedMessages_ + candidature.idCandidature}__)}">
+                        <p class="text-muted">Aucun message reçu pour cette candidature.</p>
+                    </div>
+                    <a th:each="message : ${__${receivedMessages_ + candidature.idCandidature}__}" 
+                       th:href="@{/messages/offre/{id}(id=${message.idMessageOffre})}"
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">De: <span th:text="${message.offreEmploi.entreprise.denomination}">Entreprise</span></h5>
+                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                        </div>
+                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                        <small>Offre: <span th:text="${message.offreEmploi.title}">Titre de l'offre</span></small>
+                    </a>
+                </div>
+                
+                <!-- Messages envoyés -->
+                <h4>Messages envoyés</h4>
+                <div class="list-group">
+                    <div th:if="${#lists.isEmpty(__${sentMessages_ + candidature.idCandidature}__)}">
+                        <p class="text-muted">Aucun message envoyé pour cette candidature.</p>
+                    </div>
+                    <a th:each="message : ${__${sentMessages_ + candidature.idCandidature}__}"
+                       th:href="@{/messages/candidature/{id}(id=${message.idMessageCandidature})}" 
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">À: <span th:text="${message.offreEmploi.entreprise.denomination}">Entreprise</span></h5>
+                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                        </div>
+                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                        <small>Offre: <span th:text="${message.offreEmploi.title}">Titre de l'offre</span></small>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <a th:href="@{/messages/send/application/{id}(id=${candidature.idCandidature})}" class="btn btn-primary">
+                    <i class="bi bi-envelope"></i> Envoyer un message
+                </a>
+                <a th:href="@{/applications/{id}(id=${candidature.idCandidature})}" class="btn btn-outline-secondary">
+                    <i class="bi bi-eye"></i> Voir la candidature
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Entreprise -->
+    <div th:if="${isEntreprise}" class="mb-5">
+        <h2>Mes messages par offre d'emploi</h2>
+        
+        <div th:each="offre : ${entreprise.offreEmplois}" class="card mb-4">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0" th:text="${offre.title}">Titre de l'offre</h3>
+                    <span class="badge bg-primary" th:text="${offre.qualificationLevel.labelQualification}">Qualification</span>
+                </div>
+                <p class="mb-0 text-muted">
+                    <small>Secteurs: 
+                        <span th:each="sector, iter : ${offre.sectors}">
+                            <span th:text="${sector.labelSecteur + (!iter.last ? ', ' : '')}">Secteur</span>
+                        </span>
+                    </small>
+                </p>
+            </div>
+            
+            <div class="card-body">
+                <!-- Messages reçus -->
+                <h4>Messages reçus</h4>
+                <div class="list-group mb-4">
+                    <div th:if="${#lists.isEmpty(__${receivedMessages_ + offre.idOffreEmploi}__)}">
+                        <p class="text-muted">Aucun message reçu pour cette offre.</p>
+                    </div>
+                    <a th:each="message : ${__${receivedMessages_ + offre.idOffreEmploi}__}"
+                       th:href="@{/messages/candidature/{id}(id=${message.idMessageCandidature})}" 
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">De: <span th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">Candidat</span></h5>
+                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                        </div>
+                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                        <small>Candidature #<span th:text="${message.candidature.idCandidature}">123</span></small>
+                    </a>
+                </div>
+                
+                <!-- Messages envoyés -->
+                <h4>Messages envoyés</h4>
+                <div class="list-group">
+                    <div th:if="${#lists.isEmpty(__${sentMessages_ + offre.idOffreEmploi}__)}">
+                        <p class="text-muted">Aucun message envoyé pour cette offre.</p>
+                    </div>
+                    <a th:each="message : ${__${sentMessages_ + offre.idOffreEmploi}__}"
+                       th:href="@{/messages/offre/{id}(id=${message.idMessageOffre})}" 
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">À: <span th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">Candidat</span></h5>
+                            <small th:text="${#dates.format(message.publicationDate, 'dd/MM/yyyy')}">01/01/2025</small>
+                        </div>
+                        <p class="mb-1" th:text="${#strings.abbreviate(message.message, 100)}">Message...</p>
+                        <small>Candidature #<span th:text="${message.candidature.idCandidature}">123</span></small>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <a th:href="@{/messages/send/job/{id}(id=${offre.idOffreEmploi})}" class="btn btn-primary">
+                    <i class="bi bi-envelope"></i> Envoyer un message
+                </a>
+                <a th:href="@{/jobs/{id}(id=${offre.idOffreEmploi})}" class="btn btn-outline-secondary">
+                    <i class="bi bi-eye"></i> Voir l'offre
+                </a>
+            </div>
+        </div>
+    </div>
+</article>
+</html>

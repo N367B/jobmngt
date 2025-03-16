@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/message/messageBase :: article(~{::article})}">
+<article>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/messages}">Messages</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Détails du message</li>
+        </ol>
+    </nav>
+
+    <!-- Affichage d'un message de candidature (envoyé par un candidat) -->
+    <div th:if="${isCandidatureMessage}" class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Message #<span th:text="${message.idMessageCandidature}">123</span></h2>
+                <span class="badge bg-info" th:text="${#dates.format(message.publicationDate, 'dd MMMM yyyy')}">01 January 2025</span>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4>Détails de la candidature</h4>
+                    <p>
+                        <strong>Candidat:</strong>
+                        <a th:href="@{/candidates/{id}(id=${message.candidature.candidat.idCandidat})}" 
+                           th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">
+                           Nom du candidat
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Email:</strong>
+                        <a th:href="'mailto:' + ${message.candidature.candidat.appUser.mail}" 
+                           th:text="${message.candidature.candidat.appUser.mail}">
+                           email@example.com
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Candidature:</strong>
+                        <a th:href="@{/applications/{id}(id=${message.candidature.idCandidature})}" 
+                           th:text="'#' + ${message.candidature.idCandidature}">
+                           #123
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>Détails de l'offre</h4>
+                    <p>
+                        <strong>Titre:</strong>
+                        <a th:href="@{/jobs/{id}(id=${message.offreEmploi.idOffreEmploi})}" 
+                           th:text="${message.offreEmploi.title}">
+                           Titre de l'offre
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Entreprise:</strong>
+                        <a th:href="@{/companies/{id}(id=${message.offreEmploi.entreprise.idEntreprise})}" 
+                           th:text="${message.offreEmploi.entreprise.denomination}">
+                           Nom de l'entreprise
+                        </a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4>Message</h4>
+                <div class="border p-3 rounded">
+                    <p th:text="${message.message}" style="white-space: pre-line;">Message content...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <a th:href="@{/messages}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour aux messages
+            </a>
+            <a th:if="${session.usertype == 'entreprise'}" 
+               th:href="@{/messages/send/application/{id}(id=${message.candidature.idCandidature})}" 
+               class="btn btn-primary">
+                <i class="bi bi-reply"></i> Répondre
+            </a>
+        </div>
+    </div>
+
+    <!-- Affichage d'un message d'offre (envoyé par une entreprise) -->
+    <div th:if="${isOffreMessage}" class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Message #<span th:text="${message.idMessageOffre}">123</span></h2>
+                <span class="badge bg-info" th:text="${#dates.format(message.publicationDate, 'dd MMMM yyyy')}">01 January 2025</span>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4>Détails de l'offre</h4>
+                    <p>
+                        <strong>Titre:</strong>
+                        <a th:href="@{/jobs/{id}(id=${message.offreEmploi.idOffreEmploi})}" 
+                           th:text="${message.offreEmploi.title}">
+                           Titre de l'offre
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Entreprise:</strong>
+                        <a th:href="@{/companies/{id}(id=${message.offreEmploi.entreprise.idEntreprise})}" 
+                           th:text="${message.offreEmploi.entreprise.denomination}">
+                           Nom de l'entreprise
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Email:</strong>
+                        <a th:href="'mailto:' + ${message.offreEmploi.entreprise.appUser.mail}" 
+                           th:text="${message.offreEmploi.entreprise.appUser.mail}">
+                           email@example.com
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>Détails de la candidature</h4>
+                    <p>
+                        <strong>Candidat:</strong>
+                        <a th:href="@{/candidates/{id}(id=${message.candidature.candidat.idCandidat})}" 
+                           th:text="${message.candidature.candidat.firstName + ' ' + message.candidature.candidat.lastName}">
+                           Nom du candidat
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Candidature:</strong>
+                        <a th:href="@{/applications/{id}(id=${message.candidature.idCandidature})}" 
+                           th:text="'#' + ${message.candidature.idCandidature}">
+                           #123
+                        </a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4>Message</h4>
+                <div class="border p-3 rounded">
+                    <p th:text="${message.message}" style="white-space: pre-line;">Message content...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <a th:href="@{/messages}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour aux messages
+            </a>
+            <a th:if="${session.usertype == 'candidat'}" 
+               th:href="@{/messages/send/job/{id}(id=${message.offreEmploi.idOffreEmploi})}" 
+               class="btn btn-primary">
+                <i class="bi bi-reply"></i> Répondre
+            </a>
+        </div>
+    </div>
+</article>
+</html>

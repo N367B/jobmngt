@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/message/messageBase :: article(~{::article})}">
+<article>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/messages}">Messages</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Envoyer un message</li>
+        </ol>
+    </nav>
+
+    <!-- Formulaire pour candidat qui envoie un message concernant une offre -->
+    <div th:if="${isCandidat && offre != null}" class="card mb-4">
+        <div class="card-header">
+            <h2>Envoyer un message concernant l'offre</h2>
+            <p class="text-muted">
+                <strong>Offre:</strong> <span th:text="${offre.title}">Titre de l'offre</span><br>
+                <strong>Entreprise:</strong> <span th:text="${offre.entreprise.denomination}">Nom de l'entreprise</span>
+            </p>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/messages/send/job/{id}(id=${offre.idOffreEmploi})}" method="post">
+                <div class="mb-3">
+                    <label for="candidatureId" class="form-label">Sélectionnez votre candidature</label>
+                    <select id="candidatureId" name="candidatureId" class="form-select" required>
+                        <option value="">-- Choisir une candidature --</option>
+                        <option th:each="candidature : ${candidatures}" 
+                                th:value="${candidature.idCandidature}"
+                                th:text="'Candidature #' + ${candidature.idCandidature} + ' - ' + ${candidature.qualificationLevel.labelQualification}">
+                            Candidature
+                        </option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Votre message</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required
+                              placeholder="Écrivez votre message à l'entreprise concernant cette offre..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <a th:href="@{/jobs/{id}(id=${offre.idOffreEmploi})}" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulaire pour entreprise qui envoie un message concernant une offre -->
+    <div th:if="${isEntreprise && offre != null}" class="card mb-4">
+        <div class="card-header">
+            <h2>Envoyer un message concernant votre offre</h2>
+            <p class="text-muted">
+                <strong>Offre:</strong> <span th:text="${offre.title}">Titre de l'offre</span>
+            </p>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/messages/send/job/{id}(id=${offre.idOffreEmploi})}" method="post">
+                <div class="mb-3">
+                    <label for="candidatureId" class="form-label">Sélectionnez une candidature correspondante</label>
+                    <select id="candidatureId" name="candidatureId" class="form-select" required>
+                        <option value="">-- Choisir une candidature --</option>
+                        <option th:each="candidature : ${matchingCandidatures}" 
+                                th:value="${candidature.idCandidature}"
+                                th:text="${candidature.candidat.firstName + ' ' + candidature.candidat.lastName + ' - ' + candidature.qualificationLevel.labelQualification}">
+                            Candidat
+                        </option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Votre message</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required
+                              placeholder="Écrivez votre message au candidat concernant cette offre..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <a th:href="@{/jobs/{id}(id=${offre.idOffreEmploi})}" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulaire pour candidat qui envoie un message concernant sa candidature -->
+    <div th:if="${isCandidat && candidature != null}" class="card mb-4">
+        <div class="card-header">
+            <h2>Envoyer un message concernant votre candidature</h2>
+            <p class="text-muted">
+                <strong>Candidature:</strong> #<span th:text="${candidature.idCandidature}">123</span><br>
+                <strong>Qualification:</strong> <span th:text="${candidature.qualificationLevel.labelQualification}">Qualification</span>
+            </p>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/messages/send/application/{id}(id=${candidature.idCandidature})}" method="post">
+                <div class="mb-3">
+                    <label for="offreId" class="form-label">Sélectionnez une offre d'emploi correspondante</label>
+                    <select id="offreId" name="offreId" class="form-select" required>
+                        <option value="">-- Choisir une offre --</option>
+                        <option th:each="offre : ${matchingOffres}" 
+                                th:value="${offre.idOffreEmploi}"
+                                th:text="${offre.title + ' - ' + offre.entreprise.denomination}">
+                            Offre
+                        </option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Votre message</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required
+                              placeholder="Écrivez votre message à l'entreprise concernant cette candidature..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <a th:href="@{/applications/{id}(id=${candidature.idCandidature})}" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulaire pour entreprise qui envoie un message concernant une candidature -->
+    <div th:if="${isEntreprise && candidature != null}" class="card mb-4">
+        <div class="card-header">
+            <h2>Envoyer un message concernant une candidature</h2>
+            <p class="text-muted">
+                <strong>Candidat:</strong> <span th:text="${candidature.candidat.firstName + ' ' + candidature.candidat.lastName}">Nom du candidat</span><br>
+                <strong>Candidature:</strong> #<span th:text="${candidature.idCandidature}">123</span>
+            </p>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/messages/send/application/{id}(id=${candidature.idCandidature})}" method="post">
+                <div class="mb-3">
+                    <label for="offreId" class="form-label">Sélectionnez une de vos offres</label>
+                    <select id="offreId" name="offreId" class="form-select" required>
+                        <option value="">-- Choisir une offre --</option>
+                        <option th:each="offre : ${entrepriseOffres}" 
+                                th:value="${offre.idOffreEmploi}"
+                                th:text="${offre.title}">
+                            Offre
+                        </option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Votre message</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required
+                              placeholder="Écrivez votre message au candidat concernant cette candidature..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <a th:href="@{/applications/{id}(id=${candidature.idCandidature})}" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
+</article>
+</html>
