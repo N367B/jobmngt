@@ -12,6 +12,7 @@ import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -132,9 +133,24 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
         }
         return false;
     }
+    /*
     @Override
     public List<OffreEmploi> getMatchingOffres(Candidature candidature) {
         return offreEmploiDao.findMatchingCandidature(candidature);
+    }*/
+    @Override
+    public List<OffreEmploi> getMatchingOffres(Candidature candidature) {
+        // Au lieu d'utiliser offreEmploiDao.findMatchingCandidature(candidature)
+        List<OffreEmploi> allOffres = offreEmploiDao.findAll();
+        List<OffreEmploi> matchingOffres = new ArrayList<>();
+        
+        for (OffreEmploi offre : allOffres) {
+            if (isMatchingCandidature(offre, candidature)) {
+                matchingOffres.add(offre);
+            }
+        }
+        
+        return matchingOffres;
     }
 
     @Override

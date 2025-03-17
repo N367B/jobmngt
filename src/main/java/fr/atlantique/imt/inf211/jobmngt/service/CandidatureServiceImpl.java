@@ -11,6 +11,7 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -128,9 +129,24 @@ public class CandidatureServiceImpl implements CandidatureService {
         return listCandidatures();
     }
 
+    /*
     @Override
     public List<Candidature> getMatchingCandidatures(OffreEmploi offre) {
         return candidatureDao.findMatchingOffreEmploi(offre);
+    }*/
+    @Override
+    public List<Candidature> getMatchingCandidatures(OffreEmploi offre) {
+        // Au lieu d'utiliser candidatureDao.findMatchingOffreEmploi(offre)
+        List<Candidature> allCandidatures = candidatureDao.findAll();
+        List<Candidature> matchingCandidatures = new ArrayList<>();
+        
+        for (Candidature candidature : allCandidatures) {
+            if (isMatchingOffreEmploi(candidature, offre)) {
+                matchingCandidatures.add(candidature);
+            }
+        }
+        
+        return matchingCandidatures;
     }
 
     @Override

@@ -165,11 +165,6 @@ public class OffreEmploiDao {
         logger.log(Level.INFO, "getting matching OffreEmploi for candidature: " + candidature.getIdCandidature());
         try {
             // Cette requête trouve les offres qui partagent au moins un secteur et ont le même niveau de qualification
-            String query = "SELECT DISTINCT o FROM OffreEmploi o " +
-                        "JOIN o.sectors os " +
-                        "JOIN :candidatureSectors cs " +
-                        "WHERE os = cs " +
-                        "AND o.qualificationLevel = :qualificationLevel";
             String jpql = "SELECT DISTINCT o FROM OffreEmploi o JOIN o.sectors os WHERE os IN :candidatureSectors AND o.qualificationLevel = :qualificationLevel";
             List<OffreEmploi> offres = entityManager.createQuery(jpql, OffreEmploi.class)
                 .setParameter("candidatureSectors", candidature.getSectors())

@@ -138,5 +138,30 @@
             </form>
         </div>
     </div>
+
+    <!-- Formulaire pour répondre à un message existant (cas où messageReply est défini) -->
+    <div th:if="${messageReply != null}" class="card mb-4">
+        <div class="card-header">
+            <h2>Répondre au message</h2>
+            <p class="text-muted" th:if="${offre != null}">
+                <strong>Offre:</strong> <span th:text="${offre.title}">Titre de l'offre</span>
+            </p>
+            <p class="text-muted" th:if="${candidature != null}">
+                <strong>Candidature:</strong> #<span th:text="${candidature.idCandidature}">123</span>
+            </p>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/messages/reply}" method="post">
+                <input type="hidden" name="offreId" th:value="${offre != null ? offre.idOffreEmploi : ''}">
+                <input type="hidden" name="candidatureId" th:value="${candidature != null ? candidature.idCandidature : ''}">
+                <div class="mb-3">
+                    <label for="message" class="form-label">Votre réponse</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <a th:href="@{/messages}" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
 </article>
 </html>

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -126,6 +127,7 @@ public class MessageController {
             Entreprise entreprise = entrepriseService.getEntrepriseById(uid);
             if (entreprise != null && offre.getEntreprise().getIdEntreprise() == entreprise.getIdEntreprise()) {
                 List<Candidature> matchingCandidatures = candidatureService.getMatchingCandidatures(offre);
+                
                 modelAndView.addObject("entreprise", entreprise);
                 modelAndView.addObject("isEntreprise", true);
                 modelAndView.addObject("matchingCandidatures", matchingCandidatures);
@@ -345,5 +347,74 @@ public class MessageController {
         modelAndView.addObject("message", message);
         modelAndView.addObject("isOffreMessage", true);
         return modelAndView;
+    }
+
+    /**
+     * Affiche le formulaire pour répondre à un message
+     */
+    @GetMapping("/reply")
+    public ModelAndView showReplyForm(
+            @RequestParam("offreId") Integer offreId,
+            @RequestParam("candidatureId") Integer candidatureId,
+            HttpServletRequest request) {
+        
+        ModelAndView modelAndView = new ModelAndView("message/sendMessage");
+        
+        HttpSession session = request.getSession();
+        String userType = (String) session.getAttribute("usertype");
+        
+        Candidature candidature = candidatureService.getCandidatureById(candidatureId);
+        OffreEmploi offre = offreEmploiService.getOffreById(offreId);
+        
+        if (offre == null || candidature == null) {
+            return new ModelAndView("redirect:/messages");
+        }
+        
+        modelAndView.addObject("messageReply", true);
+        modelAndView.addObject("offre", offre);
+        modelAndView.addObject("candidature", candidature);
+        
+        return modelAndView;
+    }
+    /**
+     * Traiter l'envoi d'une réponse à un message existant
+     */
+    @PostMapping("/reply")
+    public ModelAndView sendReply(
+            @RequestParam("offreId") Integer offreId,
+            @RequestParam("candidatureId") Integer candidatureId,
+            @RequestParam("message") String message,
+            HttpServletRequest request) {
+        
+        HttpSession session = request.getSession();
+        String userType = (String) session.getAttribute("usertype");
+        
+        Candidature candidature = candidatureService.getCandidatureById(candidatureId);
+        OffreEmploi offre = offreEmploiService.getOffreById(offreId);
+        
+        if (offre == null || candidature == null) {
+            return new ModelAndView("redirect:/messages");
+        }
+        
+        // Selon le type d'utilisateur, envoyer le message approprié
+        if ("candidat".equals(userType)) {
+            // Vérifier accès
+            if (!authService.checkCandidatAccess(session, candidature.getCandidat().getIdCandidat())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            MessageCandidature messageCandidature = messageService.sendMessageToCandidature(candidature, offre, message);
+            return new ModelAndView("redirect:/messages?sent=true&id=" + messageCandidature.getIdMessageCandidature());
+        } else if ("entreprise".equals(userType)) {
+            // Vérifier accès
+            if (!authService.checkEntrepriseAccess(session, offre.getEntreprise().getIdEntreprise())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            MessageOffre messageOffre = messageService.sendMessageToOffre(offre, candidature, message);
+            return new ModelAndView("redirect:/messages?sent=true&id=" + messageOffre.getIdMessageOffre());
+        }
+        
+        return new ModelAndView("redirect:/error/403");
     }
 }
