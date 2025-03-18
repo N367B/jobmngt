@@ -75,6 +75,7 @@
                     <td th:text="${offre.qualificationLevel.labelQualification}"></td>
                     <td th:text="${#dates.format(offre.publicationDate, 'dd/MM/yyyy')}"></td>
                     <td>
+                        <a th:href="@{/jobs/{id}/matchingCandidatures(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-success"><i class="bi bi-people"></i></a>
                         <a th:href="@{/jobs/{id}(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>
                         <a th:href="@{/jobs/{id}/edit(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
                         <a th:href="@{/jobs/{id}/delete(id=${offre.idOffreEmploi})}" class="btn btn-sm btn-danger" 
@@ -114,6 +115,7 @@
                     <td th:text="${candidature.qualificationLevel.labelQualification}"></td>
                     <td th:text="${#dates.format(candidature.appDate, 'dd/MM/yyyy')}"></td>
                     <td>
+                        <a th:href="@{/applications/{id}/matchingOffers(id=${candidature.idCandidature})}" class="btn btn-sm btn-success"><i class="bi bi-briefcase"></i></a>
                         <a th:href="@{/applications/{id}(id=${candidature.idCandidature})}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>
                         <a th:href="@{/applications/{id}/edit(id=${candidature.idCandidature})}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
                         <a th:href="@{/applications/{id}/delete(id=${candidature.idCandidature})}" class="btn btn-sm btn-danger" 
