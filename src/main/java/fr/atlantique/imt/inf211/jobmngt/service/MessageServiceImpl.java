@@ -32,6 +32,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private OffreEmploiService offreEmploiService;
+
+    @Autowired
+    private CandidatureService candidatureService;
     
     @Override
     public MessageCandidature sendMessageToCandidature(Candidature candidature, OffreEmploi offreEmploi, String message) {
@@ -183,6 +186,21 @@ public class MessageServiceImpl implements MessageService {
         // Pour chaque offre correspondante, envoyer une notification
         for (OffreEmploi job : matchingJobs) {
             MessageCandidature messageCandidature = sendMessageToCandidature(candidature, job, customMessage);
+            count++;
+        }
+        
+        return count;
+    }
+
+    @Override
+    public int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage) {
+        int count = 0;
+        // Trouver toutes les candidatures qui correspondent à cette offre
+        List<Candidature> matchingCandidatures = candidatureService.getMatchingCandidatures(offreEmploi);
+        
+        // Pour chaque candidature correspondante, envoyer une notification
+        for (Candidature candidature : matchingCandidatures) {
+            MessageOffre messageOffre = sendMessageToOffre(offreEmploi, candidature, customMessage);
             count++;
         }
         

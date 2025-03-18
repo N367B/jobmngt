@@ -11,6 +11,7 @@ import fr.atlantique.imt.inf211.jobmngt.service.QualificationLevelService;
 import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatureService;
 import fr.atlantique.imt.inf211.jobmngt.service.SectorService;
+import fr.atlantique.imt.inf211.jobmngt.service.MessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -40,6 +41,9 @@ public class OffreController {
 
     @Autowired
     private AuthenticationService authenticationService;
+
+    @Autowired
+    private MessageService messageService;
 
     @GetMapping
     public ModelAndView listJobs() {
@@ -166,6 +170,7 @@ public class OffreController {
     public ModelAndView updateJob(@PathVariable int id, 
                                  @ModelAttribute OffreEmploi job, 
                                  @RequestParam("selectedSectors") List<Integer> selectedSectorIds,
+                                 @RequestParam(value = "notificationMessage", required = false) String notificationMessage,
                                  HttpServletRequest request) {
 
         OffreEmploi existingJob = offreEmploiService.getOffreById(id);
@@ -189,7 +194,19 @@ public class OffreController {
         }
         
         try {
-            offreEmploiService.saveOffre(job);
+            //offreEmploiService.saveOffre(job);
+            OffreEmploi savedJob = offreEmploiService.saveOffre(job);
+            if (notificationMessage != null && !notificationMessage.trim().isEmpty()) {
+                try {
+                    int notificationCount = messageService.sendNotificationsForJob(savedJob, notificationMessage);
+                    return new ModelAndView("redirect:/jobs/notification-result?id=" + savedJob.getIdOffreEmploi() + "&count=" + notificationCount);
+                } catch (Exception e) {
+                    // En cas d'erreur, continuer et juste afficher l'offre
+                    e.printStackTrace();
+                }
+            }
+            
+    
             return new ModelAndView("redirect:/jobs/" + id);
         } catch (Exception e) {
             ModelAndView modelAndView = new ModelAndView("job/jobForm");
@@ -296,6 +313,20 @@ public class OffreController {
         ModelAndView modelAndView = new ModelAndView("job/matchingCandidatures");
         modelAndView.addObject("offre", offre);
         modelAndView.addObject("matchingCandidatures", matchingCandidatures);
+        
+        return modelAndView;
+    }
+
+    @GetMapping("/notification-result")
+    public ModelAndView showNotificationResult(@RequestParam("id") Integer id, @RequestParam("count") Integer count) {
+        ModelAndView modelAndView = new ModelAndView("job/notification-result");
+        
+        OffreEmploi job = offreEmploiService.getOffreById(id);
+        List<Candidature> notifiedCandidatures = candidatureService.getMatchingCandidatures(job);
+        
+        modelAndView.addObject("job", job);
+        modelAndView.addObject("count", count);
+        modelAndView.addObject("notifiedCandidatures", notifiedCandidatures);
         
         return modelAndView;
     }
