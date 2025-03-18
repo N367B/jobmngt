@@ -15,7 +15,7 @@
         </p>
     </div>
     
-    <form th:action="@{''}" method="post" class="card">
+    <form th:action="@{''}" method="post" class="card" onsubmit="return validateForm()">
         <div class="card-body">
             <input type="hidden" name="idCandidature" th:if="${app.idCandidature > 0}" th:value="${app.idCandidature}" />
             <input type="hidden" name="candidat.idCandidat" th:value="${app.candidat.idCandidat}" />
@@ -57,7 +57,12 @@
                         </div>
                     </div>
                 </div>
+                <!-- Message d'erreur pour les secteurs -->
+                <div id="sectorError" class="text-danger mt-2" style="display: none;">
+                    Please select at least one sector.
+                </div>
             </fieldset>
+            
             <fieldset class="mb-4">
                 <label for="notificationMessage" class="form-label">Message de notification aux entreprises</label>
                 <textarea id="notificationMessage" name="notificationMessage" class="form-control" rows="4"
@@ -81,5 +86,20 @@
             </div>
         </div>
     </form>
+
+    <script>
+        function validateForm() {
+            const checkboxes = document.querySelectorAll('input[name="selectedSectors"]:checked');
+            const errorMessage = document.getElementById('sectorError');
+            
+            if (checkboxes.length === 0) {
+                errorMessage.style.display = 'block'; // Affiche le message d'erreur
+                return false; // Empêche la soumission du formulaire
+            } else {
+                errorMessage.style.display = 'none'; // Cache le message d'erreur
+                return true; // Autorise la soumission du formulaire
+            }
+        }
+    </script>
 </article>
 </html>

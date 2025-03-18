@@ -47,6 +47,9 @@
                     </div>
                 </div>
             </div>
+            <div id="sectorError" class="text-danger mt-2" style="display: none;">
+                Please select at least one sector.
+            </div>
         </fieldset>
 
         <fieldset class="mb-4">
@@ -59,7 +62,7 @@
         </fieldset>
         
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" onclick="return validateForm();">
                 <i class="bi bi-save"></i> Save
             </button>
             <button type="reset" class="btn btn-secondary">
@@ -70,5 +73,21 @@
             </a>
         </div>
     </form>
+
+    <script>
+        function validateForm() {
+            const checkboxes = document.querySelectorAll('input[name="selectedSectors"]:checked');
+            const errorMessage = document.getElementById('sectorError');
+            
+            if (checkboxes.length === 0) {
+                errorMessage.style.display = 'block'; // Show error message
+                return false; // Prevent form submission
+            } else {
+                errorMessage.style.display = 'none'; // Hide error message
+                return true; // Allow form submission
+            }
+        }
+    </script>
+
 </article>
 </html>
