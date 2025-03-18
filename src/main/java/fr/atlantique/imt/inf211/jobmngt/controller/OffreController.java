@@ -1,5 +1,6 @@
 package fr.atlantique.imt.inf211.jobmngt.controller;
 
+import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
@@ -8,6 +9,7 @@ import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
 import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 import fr.atlantique.imt.inf211.jobmngt.service.QualificationLevelService;
 import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
+import fr.atlantique.imt.inf211.jobmngt.service.CandidatureService;
 import fr.atlantique.imt.inf211.jobmngt.service.SectorService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -258,6 +260,42 @@ public class OffreController {
         modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
         modelAndView.addObject("selectedSector", sector);
         modelAndView.addObject("selectedQualification", qualification);
+        
+        return modelAndView;
+    }
+
+    @Autowired
+    private CandidatureService candidatureService;
+
+    @GetMapping("/{id}/matchingCandidatures")
+    public ModelAndView viewMatchingCandidatures(@PathVariable int id, HttpServletRequest request) {
+        // Vérifier que l'utilisateur est authentifié et est une entreprise
+        if (!authenticationService.isAuthenticated(request.getSession()) || 
+            !authenticationService.isEntreprise(request.getSession())) {
+            return new ModelAndView("redirect:/error/403");
+        }
+        
+        // Récupérer l'offre d'emploi
+        OffreEmploi offre = offreEmploiService.getOffreById(id);
+        if (offre == null) {
+            return new ModelAndView("redirect:/jobs");
+        }
+        
+        // Vérifier que l'utilisateur connecté est l'entreprise qui a créé l'offre
+        HttpSession session = request.getSession();
+        Integer uid = (Integer) session.getAttribute("uid");
+        
+        if (!authenticationService.isAuthenticated(request.getSession()) || 
+            !authenticationService.isEntreprise(request.getSession())) {
+            return new ModelAndView("redirect:/error/403");
+        }
+        
+        // Récupérer les candidatures correspondantes
+        List<Candidature> matchingCandidatures = candidatureService.getMatchingCandidatures(offre);
+        
+        ModelAndView modelAndView = new ModelAndView("job/matchingCandidatures");
+        modelAndView.addObject("offre", offre);
+        modelAndView.addObject("matchingCandidatures", matchingCandidatures);
         
         return modelAndView;
     }

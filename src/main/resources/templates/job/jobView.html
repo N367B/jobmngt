@@ -67,6 +67,11 @@
                     <i class="bi bi-send"></i> Apply for this position
                 </a>
             </div>
+            <div class="mt-4" th:if="${session.uid != null && session.usertype == 'entreprise' && session.uid == job.entreprise.idEntreprise}">
+                <a th:href="@{/jobs/{id}/matchingCandidatures(id=${job.idOffreEmploi})}" class="btn btn-info btn-lg">
+                    <i class="bi bi-people"></i> Voir les candidatures correspondantes
+                </a>
+            </div>
         </div>
     </div>
 

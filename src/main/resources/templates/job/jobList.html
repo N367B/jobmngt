@@ -69,6 +69,12 @@
                 <div class="card-footer">
                     <a th:href="@{/jobs/{id}(id=${job.idOffreEmploi})}" class="btn btn-primary">View details</a>
                     <div class="btn-group float-end" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'entreprise' && session.uid == job.entreprise.idEntreprise))}">
+                        <a th:if="${session.uid != null && session.usertype == 'entreprise' && session.uid == job.entreprise.idEntreprise}" 
+                           th:href="@{/jobs/{id}/matchingCandidatures(id=${job.idOffreEmploi})}" 
+                           class="btn btn-sm btn-outline-info" 
+                           title="Voir les candidatures correspondantes">
+                           <i class="bi bi-people"></i>
+                        </a>
                         <a th:href="@{/jobs/{id}/edit(id=${job.idOffreEmploi})}" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-pencil"></i>
                         </a>
