@@ -5,14 +5,11 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
 import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/companies")
@@ -27,8 +24,7 @@ public class EntrepriseController {
     @GetMapping
     public ModelAndView listCompanies() {
         ModelAndView modelAndView = new ModelAndView("company/companyList");
-        List<Entreprise> companies = entrepriseService.listEntreprises();
-        modelAndView.addObject("companieslist", companies);
+        modelAndView.addObject("companieslist", entrepriseService.listEntreprises());
         return modelAndView;
     }
 
@@ -59,32 +55,20 @@ public class EntrepriseController {
     public ModelAndView createCompany(@ModelAttribute Entreprise company) {
         ModelAndView modelAndView = new ModelAndView();
         
-        // Vérification de la longueur du mot de passe
-        if (company.getAppUser().getPassword() == null || company.getAppUser().getPassword().length() < 4) {
-            modelAndView.setViewName("company/companyForm");
-            modelAndView.addObject("company", company);
-            modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
-            modelAndView.addObject("action", "create");
-            return modelAndView;
-        }
-        
         try {
-            company.getAppUser().setUserType("entreprise");
-            Entreprise savedCompany = entrepriseService.saveEntreprise(company);
-            //return new ModelAndView("redirect:/companies/" + savedCompany.getIdEntreprise());
+            // La validation du mot de passe sera faite dans le service
+            Entreprise savedCompany = entrepriseService.createEntreprise(company);
             return new ModelAndView("redirect:/companies");
         } catch (IllegalArgumentException e) {
-            // Capture l'exception lancée quand l'email existe déjà
             modelAndView.setViewName("company/companyForm");
             modelAndView.addObject("company", company);
-            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
+            modelAndView.addObject("error", e.getMessage());
             modelAndView.addObject("action", "create");
             return modelAndView;
         } catch (Exception e) {
-            // Pour les autres erreurs
             modelAndView.setViewName("company/companyForm");
             modelAndView.addObject("company", company);
-            modelAndView.addObject("error", "Une erreur est survenue lors de la création de l'entreprise : " + e.getMessage());
+            modelAndView.addObject("error", "Une erreur est survenue: " + e.getMessage());
             modelAndView.addObject("action", "create");
             return modelAndView;
         }
@@ -92,61 +76,37 @@ public class EntrepriseController {
 
     @GetMapping("/{id}/edit")
     public ModelAndView editCompanyForm(@PathVariable int id, HttpServletRequest request) {
-    if (!authService.checkEntrepriseAccess(request.getSession(), id)) {
-        return new ModelAndView("redirect:/error/403");
-    }    
-    Entreprise company = entrepriseService.getEntrepriseById(id);
-    ModelAndView modelAndView = new ModelAndView("company/companyForm");
-    modelAndView.addObject("company", company);
-    modelAndView.addObject("action", "edit");
-    return modelAndView;
-}
-
-    @PostMapping("/{id}/edit")
-    public ModelAndView updateCompany(@PathVariable int id, @ModelAttribute Entreprise company, HttpServletRequest request) {
-        // Vérification des permissions
         if (!authService.checkEntrepriseAccess(request.getSession(), id)) {
             return new ModelAndView("redirect:/error/403");
         }
         
-        Entreprise existingCompany = entrepriseService.getEntrepriseById(id);
-        ModelAndView modelAndView = new ModelAndView();
-        
-        // Vérification du mot de passe si fourni
-        String password = company.getAppUser().getPassword();
-        if (password != null && !password.isEmpty()) {
-            if (password.length() < 4) {
-                modelAndView.setViewName("company/companyForm");
-                modelAndView.addObject("company", company);
-                modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
-                modelAndView.addObject("action", "edit");
-                return modelAndView;
-            }
-        } else {
-            // Si aucun mot de passe n'est fourni, conserver l'ancien
-            company.getAppUser().setPassword(existingCompany.getAppUser().getPassword());
+        ModelAndView modelAndView = new ModelAndView("company/companyForm");
+        modelAndView.addObject("company", entrepriseService.getEntrepriseById(id));
+        modelAndView.addObject("action", "edit");
+        return modelAndView;
+    }
+
+    @PostMapping("/{id}/edit")
+    public ModelAndView updateCompany(@PathVariable int id, @ModelAttribute Entreprise company, HttpServletRequest request) {
+        if (!authService.checkEntrepriseAccess(request.getSession(), id)) {
+            return new ModelAndView("redirect:/error/403");
         }
         
-        // Configuration des IDs
-        company.setIdEntreprise(id);
-        company.getAppUser().setIdUser(existingCompany.getAppUser().getIdUser());
-        company.getAppUser().setUserType("entreprise");
+        ModelAndView modelAndView = new ModelAndView();
         
         try {
-            entrepriseService.saveEntreprise(company);
+            entrepriseService.updateEntreprise(id, company);
             return new ModelAndView("redirect:/companies/" + id);
         } catch (IllegalArgumentException e) {
-            // Capture l'exception lancée quand l'email existe déjà
             modelAndView.setViewName("company/companyForm");
             modelAndView.addObject("company", company);
-            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
+            modelAndView.addObject("error", e.getMessage());
             modelAndView.addObject("action", "edit");
             return modelAndView;
         } catch (Exception e) {
-            // Pour les autres erreurs
             modelAndView.setViewName("company/companyForm");
             modelAndView.addObject("company", company);
-            modelAndView.addObject("error", "Une erreur est survenue lors de la mise à jour de l'entreprise : " + e.getMessage());
+            modelAndView.addObject("error", "Une erreur est survenue: " + e.getMessage());
             modelAndView.addObject("action", "edit");
             return modelAndView;
         }

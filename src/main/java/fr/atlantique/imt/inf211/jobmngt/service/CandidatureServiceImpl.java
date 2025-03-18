@@ -11,8 +11,11 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class CandidatureServiceImpl implements CandidatureService {
@@ -170,4 +173,62 @@ public class CandidatureServiceImpl implements CandidatureService {
         return false;
     }
 
+    @Override
+    public Candidature createCandidatureWithSectors(Candidature candidature, List<Integer> selectedSectorIds) {
+        // Mise à jour des secteurs sélectionnés
+        Set<Sector> sectors = new HashSet<>();
+        for (Integer sectorId : selectedSectorIds) {
+            Sector sector = sectorDao.findById(sectorId);
+            if (sector != null) {
+                sectors.add(sector);
+            }
+        }
+        candidature.setSectors(sectors);
+        
+        // Définir la date actuelle
+        candidature.setAppDate(new Date());
+        
+        // Générer un nom de CV si nécessaire
+        if (candidature.getCv() == null || candidature.getCv().trim().isEmpty()) {
+            candidature.setCv(generateCvFilename(candidature));
+        }
+        
+        // Persister et retourner la candidature
+        return saveCandidature(candidature);
+    }
+
+    @Override
+    public Candidature updateCandidatureWithSectors(int id, Candidature formCandidature, List<Integer> selectedSectorIds) {
+        // Récupérer la candidature existante
+        Candidature existingCandidature = getCandidatureById(id);
+        if (existingCandidature == null) {
+            throw new IllegalArgumentException("Candidature non trouvée avec l'ID: " + id);
+        }
+        
+        // Mettre à jour les propriétés modifiables
+        existingCandidature.setAppDate(new Date());
+        existingCandidature.setCv(formCandidature.getCv());
+        existingCandidature.setQualificationLevel(formCandidature.getQualificationLevel());
+        
+        // Mise à jour des secteurs
+        Set<Sector> sectors = new HashSet<>();
+        for (Integer sectorId : selectedSectorIds) {
+            Sector sector = sectorDao.findById(sectorId);
+            if (sector != null) {
+                sectors.add(sector);
+            }
+        }
+        existingCandidature.setSectors(sectors);
+        
+        // Persister et retourner la candidature
+        return saveCandidature(existingCandidature);
+    }
+
+    @Override
+    public String generateCvFilename(Candidature candidature) {
+        String firstName = candidature.getCandidat().getFirstName();
+        String lastName = candidature.getCandidat().getLastName();
+        String timestamp = new java.text.SimpleDateFormat("yyyy_MM_dd").format(new Date());
+        return "CV_" + firstName + "_" + lastName + "_" + timestamp + ".pdf";
+    }
 }

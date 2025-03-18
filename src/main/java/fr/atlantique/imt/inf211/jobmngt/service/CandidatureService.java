@@ -21,6 +21,8 @@ public interface CandidatureService {
 
     List<Candidature> getMatchingCandidatures(OffreEmploi offre);
     boolean isMatchingOffreEmploi(Candidature candidature, OffreEmploi offre);
-
+    Candidature createCandidatureWithSectors(Candidature candidature, List<Integer> selectedSectorIds);
+    Candidature updateCandidatureWithSectors(int id, Candidature formCandidature, List<Integer> selectedSectorIds);
+    String generateCvFilename(Candidature candidature);
 
 }

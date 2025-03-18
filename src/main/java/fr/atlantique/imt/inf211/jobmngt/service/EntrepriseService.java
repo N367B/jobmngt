@@ -9,5 +9,7 @@ public interface EntrepriseService {
     long countEntreprises();
     Entreprise saveEntreprise(Entreprise entreprise);
     boolean deleteEntreprise(int id);
-    Entreprise createEntreprise(Entreprise entreprise);
+    
+    Entreprise createEntreprise(Entreprise entreprise) throws IllegalArgumentException;
+    Entreprise updateEntreprise(int id, Entreprise updatedEntreprise) throws IllegalArgumentException;
 }

@@ -35,37 +35,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
         return entrepriseDao.findAll("denomination", "asc").size();
     }
 
-    @Override
-    public Entreprise createEntreprise(Entreprise entreprise) {
-        // Vérifie si une entreprise avec le même email ou dénomination existe déjà
-        Entreprise existingEntreprises = entrepriseDao.findByUserMail(entreprise.getAppUser().getMail());
-        
-        if (existingEntreprises !=null) {
-            throw new IllegalArgumentException("Une entreprise avec cet email existe déjà.");
-        }
 
-        // Persiste la nouvelle entreprise
-        entrepriseDao.persist(entreprise);
-        return entreprise;
-    }
-
-
-    /*@Override
-    public Entreprise saveEntreprise(Entreprise entreprise) {
-        // Vérifier si un utilisateur (candidat OU entreprise) avec cet email existe déjà
-        Optional<AppUser> existingUser = appUserDao.findByMail(entreprise.getAppUser().getMail());
-        
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur.");
-        }
-        
-        if (entreprise.getIdEntreprise() == 0) {
-            entrepriseDao.persist(entreprise);
-        } else {
-            entreprise = entrepriseDao.merge(entreprise);
-        }
-        return entreprise;
-    }*/
 
     @Override
     public Entreprise saveEntreprise(Entreprise entreprise) {
@@ -117,5 +87,58 @@ public class EntrepriseServiceImpl implements EntrepriseService {
         return true;
     }
     return false;
+    }
+
+    @Override
+    public Entreprise createEntreprise(Entreprise entreprise) throws IllegalArgumentException {
+        // Validation du mot de passe
+        if (entreprise.getAppUser().getPassword() == null || entreprise.getAppUser().getPassword().length() < 4) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 4 caractères.");
+        }
+        
+        // Vérification de l'email
+        Optional<AppUser> existingUser = appUserDao.findByMail(entreprise.getAppUser().getMail());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
+        }
+        
+        // Configuration de l'entreprise
+        entreprise.getAppUser().setUserType("entreprise");
+        
+        // Sauvegarde
+        return saveEntreprise(entreprise);
+    }
+
+    @Override
+    public Entreprise updateEntreprise(int id, Entreprise updatedEntreprise) throws IllegalArgumentException {
+        Entreprise existingEntreprise = getEntrepriseById(id);
+        if (existingEntreprise == null) {
+            throw new IllegalArgumentException("Entreprise non trouvée");
+        }
+        
+        // Validation du mot de passe s'il est fourni
+        String password = updatedEntreprise.getAppUser().getPassword();
+        if (password != null && !password.isEmpty()) {
+            if (password.length() < 4) {
+                throw new IllegalArgumentException("Le mot de passe doit contenir au moins 4 caractères.");
+            }
+        } else {
+            // Conserver l'ancien mot de passe
+            updatedEntreprise.getAppUser().setPassword(existingEntreprise.getAppUser().getPassword());
+        }
+        
+        // Vérification de l'email
+        Optional<AppUser> existingUser = appUserDao.findByMail(updatedEntreprise.getAppUser().getMail());
+        if (existingUser.isPresent() && existingUser.get().getIdUser() != existingEntreprise.getAppUser().getIdUser()) {
+            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
+        }
+        
+        // Configuration des IDs
+        updatedEntreprise.setIdEntreprise(id);
+        updatedEntreprise.getAppUser().setIdUser(existingEntreprise.getAppUser().getIdUser());
+        updatedEntreprise.getAppUser().setUserType("entreprise");
+        
+        // Sauvegarde
+        return saveEntreprise(updatedEntreprise);
     }
 }
