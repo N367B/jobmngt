@@ -96,6 +96,7 @@ public class OffreController {
     @PostMapping("/create")
     public ModelAndView createJob(@ModelAttribute OffreEmploi job, 
                                  @RequestParam("selectedSectors") List<Integer> selectedSectorIds,
+                                 @RequestParam(value = "notificationMessage", required = false) String notificationMessage,
                                  HttpServletRequest request) {
         // Vérifier que l'utilisateur est connecté et est une entreprise
         HttpSession session = request.getSession();
@@ -134,6 +135,22 @@ public class OffreController {
         
         try {
             OffreEmploi savedJob = offreEmploiService.saveOffre(job);
+            System.out.println("Offre créée avec ID: " + savedJob.getIdOffreEmploi());
+            System.out.println("Message de notification reçu: " + (notificationMessage != null ? notificationMessage : "null"));
+            
+            if (notificationMessage != null && !notificationMessage.trim().isEmpty()) {
+                System.out.println("Tentative d'envoi de notifications pour l'offre " + savedJob.getIdOffreEmploi());
+                try {
+                    int notificationCount = messageService.sendNotificationsForJob(savedJob, notificationMessage);
+                    System.out.println("Nombre de notifications envoyées: " + notificationCount);
+                    return new ModelAndView("redirect:/jobs/notification-result?id=" + savedJob.getIdOffreEmploi() + "&count=" + notificationCount);
+                } catch (Exception e) {
+                    System.err.println("ERREUR lors de l'envoi des notifications: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Aucun message de notification fourni ou message vide");
+            }
             return new ModelAndView("redirect:/jobs/" + savedJob.getIdOffreEmploi());
         } catch (Exception e) {
             ModelAndView modelAndView = new ModelAndView("job/jobForm");
@@ -170,7 +187,6 @@ public class OffreController {
     public ModelAndView updateJob(@PathVariable int id, 
                                  @ModelAttribute OffreEmploi job, 
                                  @RequestParam("selectedSectors") List<Integer> selectedSectorIds,
-                                 @RequestParam(value = "notificationMessage", required = false) String notificationMessage,
                                  HttpServletRequest request) {
 
         OffreEmploi existingJob = offreEmploiService.getOffreById(id);
@@ -194,19 +210,7 @@ public class OffreController {
         }
         
         try {
-            //offreEmploiService.saveOffre(job);
-            OffreEmploi savedJob = offreEmploiService.saveOffre(job);
-            if (notificationMessage != null && !notificationMessage.trim().isEmpty()) {
-                try {
-                    int notificationCount = messageService.sendNotificationsForJob(savedJob, notificationMessage);
-                    return new ModelAndView("redirect:/jobs/notification-result?id=" + savedJob.getIdOffreEmploi() + "&count=" + notificationCount);
-                } catch (Exception e) {
-                    // En cas d'erreur, continuer et juste afficher l'offre
-                    e.printStackTrace();
-                }
-            }
-            
-    
+            offreEmploiService.saveOffre(job);
             return new ModelAndView("redirect:/jobs/" + id);
         } catch (Exception e) {
             ModelAndView modelAndView = new ModelAndView("job/jobForm");
