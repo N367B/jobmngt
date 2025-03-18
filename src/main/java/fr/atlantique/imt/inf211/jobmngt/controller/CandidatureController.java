@@ -386,4 +386,33 @@ public class CandidatureController {
         
         return modelAndView;
     }
+
+    @GetMapping("/{id}/matchingOffers")
+    public ModelAndView viewMatchingOffers(@PathVariable int id, HttpServletRequest request) {
+        // Vérifier que l'utilisateur est authentifié
+        if (!authService.isAuthenticated(request.getSession())) {
+            return new ModelAndView("redirect:/login?redirect=/applications/" + id + "/matchingOffers");
+        }
+        
+        // Récupérer la candidature
+        Candidature candidature = candidatureService.getCandidatureById(id);
+        if (candidature == null) {
+            return new ModelAndView("redirect:/applications");
+        }
+        
+        // Vérifier que l'utilisateur est le propriétaire de la candidature ou un admin
+        if (!authService.checkCandidatAccess(request.getSession(), candidature.getCandidat().getIdCandidat())) {
+            return new ModelAndView("redirect:/error/403");
+        }
+        
+        // Récupérer les offres correspondantes
+        List<OffreEmploi> matchingOffers = offreEmploiService.getMatchingOffres(candidature);
+        
+        ModelAndView modelAndView = new ModelAndView("application/matchingOffers");
+        modelAndView.addObject("candidature", candidature);
+        modelAndView.addObject("matchingOffers", matchingOffers);
+        
+        return modelAndView;
+    }
+    
 }

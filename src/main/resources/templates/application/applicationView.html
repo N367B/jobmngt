@@ -107,8 +107,12 @@
                             <span th:if="${!iterStat.last}">, </span>
                         </span>
                     </p>
-
                 </div>
+            </div>
+            <div class="mt-3" th:if="${session.uid != null && (session.usertype == 'candidat' && session.uid == applicationDTO.idCandidat) || session.usertype == 'admin'}">
+                <a th:href="@{/applications/{id}/matchingOffers(id=${applicationDTO.idCandidature})}" class="btn btn-info">
+                    <i class="bi bi-briefcase"></i> Voir les offres d'emploi correspondantes
+                </a>
             </div>
         </div>
     </div>

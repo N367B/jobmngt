@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/baseTemplate/base :: layout(~{::title},~{::section})}">
+<title>Offres d'emploi correspondantes</title>
+<section>
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3>Offres correspondant à votre candidature: <span th:text="${candidature.cv}">CV</span></h3>
+                <a th:href="@{/applications/{id}(id=${candidature.idCandidature})}" class="btn btn-light">
+                    <i class="bi bi-arrow-left"></i> Retour à la candidature
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Candidat:</strong> 
+                        <span th:text="${candidature.candidat.firstName + ' ' + candidature.candidat.lastName}">Nom Candidat</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Secteurs:</strong>
+                        <span th:each="sector, iterStat : ${candidature.sectors}">
+                            <span th:text="${sector.labelSecteur}">Secteur</span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Qualification:</strong>
+                        <span th:text="${candidature.qualificationLevel.labelQualification}">Qualification</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4>Offres d'emploi correspondantes (<span th:text="${matchingOffers.size()}">0</span>)</h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(matchingOffers)}" class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Aucune offre ne correspond à votre candidature pour le moment.
+                </div>
+                <div th:unless="${#lists.isEmpty(matchingOffers)}" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Entreprise</th>
+                                <th>Ville</th>
+                                <th>Qualification</th>
+                                <th>Secteurs</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="offre : ${matchingOffers}">
+                                <td th:text="${offre.title}">Titre</td>
+                                <td>
+                                    <a th:href="@{/companies/{id}(id=${offre.entreprise.idEntreprise})}" 
+                                       th:text="${offre.entreprise.denomination}">
+                                       Nom Entreprise
+                                    </a>
+                                </td>
+                                <td th:text="${offre.entreprise.appUser.city}">Ville</td>
+                                <td th:text="${offre.qualificationLevel.labelQualification}">Qualification</td>
+                                <td>
+                                    <span th:each="sector, iterStat : ${offre.sectors}">
+                                        <span th:text="${sector.labelSecteur}">Secteur</span>
+                                        <span th:if="${!iterStat.last}">, </span>
+                                    </span>
+                                </td>
+                                <td th:text="${#dates.format(offre.publicationDate, 'dd/MM/yyyy')}">Date</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/jobs/{id}(id=${offre.idOffreEmploi})}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye"></i> Détails
+                                        </a>
+                                        <a th:href="@{/messages/send/application/{appId}(appId=${candidature.idCandidature},offreId=${offre.idOffreEmploi})}" 
+                                           class="btn btn-sm btn-success">
+                                            <i class="bi bi-chat-dots"></i> Contacter
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>

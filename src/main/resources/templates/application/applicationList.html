@@ -69,6 +69,11 @@
                 <div class="card-footer">
                     <a th:href="@{/applications/{id}(id=${app.idCandidature})}" class="btn btn-primary">View details</a>
                     <div class="btn-group float-end" th:if="${session.uid != null && (session.usertype == 'admin' || (session.usertype == 'candidat' && session.uid == app.candidat.idCandidat))}">
+                        <a th:href="@{/applications/{id}/matchingOffers(id=${app.idCandidature})}" 
+                        class="btn btn-sm btn-outline-info" 
+                        title="Voir les offres correspondantes">
+                            <i class="bi bi-briefcase"></i>
+                        </a>
                         <a th:href="@{/applications/{id}/edit(id=${app.idCandidature})}" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-pencil"></i>
                         </a>
