@@ -13,6 +13,36 @@
     <script th:src="@{/js/gyj_imt.js}"></script>
     <script src="http://localhost:35729/livereload.js"></script>
 
+    <script src="https://unpkg.com/gremlins.js"></script>
+    <!--
+    <script>
+      window.onload = function() {
+        gremlins.createHorde({
+          seed: 123,
+          delay: 50,
+          aggressiveness: 1,
+          species: [
+          gremlins.species.clicker({
+            canClick: function(target) {
+              // If the target is a button, return true with a high probability.
+              if (target && target.tagName === 'BUTTON') {
+                return Math.random() < 0.9; // 90% chance to click buttons.
+              }
+              // For other elements, return true with a lower probability.
+              return Math.random() < 0.1;
+            }
+          }),
+            gremlins.species.formFiller(),
+            gremlins.species.typer(),
+            gremlins.species.scroller()
+
+          ]
+        }).unleash();
+      };
+    </script>-->
+    
+
+
     <link rel="icon" th:href="@{/img/favicon-32x32.png}" sizes="32x32" type="image/png">
     <title th:replace="${title}">IMT Atlantique: Get Your Job</title>
 

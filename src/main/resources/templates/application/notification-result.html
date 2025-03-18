@@ -5,7 +5,7 @@
     <div class="container mt-4">
         <div class="alert alert-success">
             <h3><i class="bi bi-check-circle"></i> Candidature créée avec succès</h3>
-            <p>Votre candidature <strong th:text="${application.cv}">CV</strong> a été publiée.</p>
+            <p>Votre candidature <strong th:text="${app.cv}">CV</strong> a été publiée.</p>
         </div>
         
         <div class="card">
@@ -58,10 +58,10 @@
                 </div>
                 
                 <div class="mt-3">
-                    <a th:href="@{/applications/{id}(id=${application.idCandidature})}" class="btn btn-primary">
+                    <a th:href="@{/applications/{id}(id=${app.idCandidature})}" class="btn btn-primary">
                         <i class="bi bi-eye"></i> Voir les détails de la candidature
                     </a>
-                    <a th:href="@{/applications/{id}/matchingOffers(id=${application.idCandidature})}" class="btn btn-info">
+                    <a th:href="@{/applications/{id}/matchingOffers(id=${app.idCandidature})}" class="btn btn-info">
                         <i class="bi bi-briefcase"></i> Voir les offres correspondantes
                     </a>
                     <a th:href="@{/applications}" class="btn btn-outline-secondary">

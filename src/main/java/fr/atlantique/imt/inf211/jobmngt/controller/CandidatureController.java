@@ -108,7 +108,7 @@ public class CandidatureController {
         
         // Passer à la fois le DTO et l'objet d'origine au modèle
         modelAndView.addObject("applicationDTO", applicationDTO);
-        modelAndView.addObject("application", application);
+        modelAndView.addObject("app", application);
         
         return modelAndView;
     }
@@ -201,10 +201,11 @@ public class CandidatureController {
         application.setSectors(sectors);
         application.setAppDate(new Date());
         // Vérifier que le CV a un nom, sinon en générer un
+        System.out.println("Candidat : " + application.getCandidat());
         if (application.getCv() == null || application.getCv().trim().isEmpty()) {
             String firstName = application.getCandidat().getFirstName();
             String lastName = application.getCandidat().getLastName();
-            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd").format(new Date());
+            String timestamp = new java.text.SimpleDateFormat("yyyy_MM_dd").format(new Date());
             application.setCv("CV_" + firstName + "_" + lastName + "_" + timestamp + ".pdf");
         }
         
@@ -438,7 +439,7 @@ public class CandidatureController {
         Candidature application = candidatureService.getCandidatureById(id);
         List<OffreEmploi> notifiedOffers = offreEmploiService.getMatchingOffres(application);
         
-        modelAndView.addObject("application", application);
+        modelAndView.addObject("app", application);
         modelAndView.addObject("count", count);
         modelAndView.addObject("notifiedOffers", notifiedOffers);
         
