@@ -386,4 +386,28 @@ public class CandidatureController {
         
         return modelAndView;
     }
+
+    @GetMapping("/{id}/matchingJobs")
+    public ModelAndView viewMatchingJobs(@PathVariable int id, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Integer uid = (Integer) session.getAttribute("uid");
+        String userType = (String) session.getAttribute("usertype");
+
+        // Vérification que l'utilisateur est connecté et est un candidat
+        if (uid == null || !"candidat".equals(userType)) {
+            return new ModelAndView("redirect:/error/403");
+        }
+
+        Candidature candidature = candidatureService.getCandidatureById(id);
+        if (candidature == null || candidature.getCandidat().getIdCandidat() != uid) {
+            return new ModelAndView("redirect:/error/403");
+        }
+
+        List<OffreEmploi> matchingJobs = offreEmploiService.getMatchingOffres(candidature);
+
+        ModelAndView modelAndView = new ModelAndView("application/matchingJobsList");
+        modelAndView.addObject("candidature", candidature);
+        modelAndView.addObject("matchingJobs", matchingJobs);
+        return modelAndView;
+    }
 }
