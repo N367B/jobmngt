@@ -13,6 +13,9 @@ public interface MessageService {
     List<MessageCandidature> findCandidatureMessagesByOffreEmploi(OffreEmploi offreEmploi);
     int sendNotificationsForApplication(Candidature candidature);
     MessageCandidature getMessageCandidatureById(int id);
+
+    // Dans MessageService.java
+int sendNotificationsForApplication(Candidature candidature, String customMessage);
     
     // Méthodes pour MessageOffre (messages d'entreprises vers candidats)
     MessageOffre sendMessageToOffre(OffreEmploi offreEmploi, Candidature candidature, String message);

@@ -8,6 +8,7 @@ import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatureService;
+import fr.atlantique.imt.inf211.jobmngt.service.MessageService;
 import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
 import fr.atlantique.imt.inf211.jobmngt.service.QualificationLevelService;
@@ -47,6 +48,9 @@ public class CandidatureController {
 
     @Autowired
     private AuthenticationService authService;
+
+    @Autowired
+    private MessageService messageService;
     
     @GetMapping
     public ModelAndView listApplications() {
@@ -184,8 +188,8 @@ public class CandidatureController {
     @PostMapping("/create")
     public ModelAndView createApplication(
             @ModelAttribute Candidature application, 
-            @RequestParam("selectedSectors") List<Integer> selectedSectorIds) {
-        
+            @RequestParam("selectedSectors") List<Integer> selectedSectorIds,
+            @RequestParam(value = "notificationMessage", required = false) String notificationMessage) {       
         // Mise à jour des secteurs sélectionnés
         Set<Sector> sectors = new HashSet<>();
         for (Integer sectorId : selectedSectorIds) {
@@ -207,6 +211,16 @@ public class CandidatureController {
         // Enregistrer la candidature
         Candidature savedApplication = candidatureService.saveCandidature(application);
         
+        if (notificationMessage != null && !notificationMessage.trim().isEmpty()) {
+            try {
+                int notificationCount = messageService.sendNotificationsForApplication(savedApplication, notificationMessage);
+                return new ModelAndView("redirect:/applications/notification-result?id=" + savedApplication.getIdCandidature() + "&count=" + notificationCount);
+            } catch (Exception e) {
+                // En cas d'erreur, continuer et juste afficher la candidature
+                e.printStackTrace();
+            }
+        }
+    
         return new ModelAndView("redirect:/applications/" + savedApplication.getIdCandidature());
     }
 
@@ -415,4 +429,19 @@ public class CandidatureController {
         return modelAndView;
     }
     
+    @GetMapping("/notification-result")
+    public ModelAndView showNotificationResult(
+            @RequestParam("id") Integer id, 
+            @RequestParam("count") Integer count) {
+        ModelAndView modelAndView = new ModelAndView("application/notification-result");
+        
+        Candidature application = candidatureService.getCandidatureById(id);
+        List<OffreEmploi> notifiedOffers = offreEmploiService.getMatchingOffres(application);
+        
+        modelAndView.addObject("application", application);
+        modelAndView.addObject("count", count);
+        modelAndView.addObject("notifiedOffers", notifiedOffers);
+        
+        return modelAndView;
+    }
 }

@@ -29,6 +29,9 @@ public class MessageServiceImpl implements MessageService {
     
     @Autowired
     private OffreEmploiDao offreEmploiDao;
+
+    @Autowired
+    private OffreEmploiService offreEmploiService;
     
     @Override
     public MessageCandidature sendMessageToCandidature(Candidature candidature, OffreEmploi offreEmploi, String message) {
@@ -168,6 +171,22 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public MessageOffre getMessageOffreById(int id) {
         return messageOffreDao.findById(id);
+    }
+
+    // Dans MessageServiceImpl.java
+    @Override
+    public int sendNotificationsForApplication(Candidature candidature, String customMessage) {
+        int count = 0;
+        // Trouver toutes les offres qui correspondent à cette candidature
+        List<OffreEmploi> matchingJobs = offreEmploiService.getMatchingOffres(candidature);
+        
+        // Pour chaque offre correspondante, envoyer une notification
+        for (OffreEmploi job : matchingJobs) {
+            MessageCandidature messageCandidature = sendMessageToCandidature(candidature, job, customMessage);
+            count++;
+        }
+        
+        return count;
     }
 
 }
