@@ -37,9 +37,6 @@ public class MessageController {
     @Autowired
     private AuthenticationService authService;
     
-    /**
-     * Liste tous les messages pour l'utilisateur connecté
-     */
     @GetMapping
     public ModelAndView listMessages(HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("message/messageList");
@@ -58,15 +55,16 @@ public class MessageController {
                 modelAndView.addObject("candidat", candidat);
                 modelAndView.addObject("isCandidat", true);
                 
-                // Une Map pour stocker les messages par candidature
-                Map<Integer, List<Object>> messagesByCandidature = new HashMap<>();
-                
+                // Créer les listes distinctes pour chaque candidature
                 for (Candidature candidature : candidat.getCandidatures()) {
-                    messagesByCandidature.put(candidature.getIdCandidature(), 
-                        messageService.getAllMessagesForCandidature(candidature));
+                    int idCandidature = candidature.getIdCandidature();
+                    // Messages reçus = MessageOffre
+                    modelAndView.addObject("receivedMessages_" + idCandidature, 
+                            messageService.findOffreMessagesByCandidature(candidature));
+                    // Messages envoyés = MessageCandidature
+                    modelAndView.addObject("sentMessages_" + idCandidature, 
+                            messageService.findCandidatureMessagesByCandidature(candidature));
                 }
-                
-                modelAndView.addObject("messagesByCandidature", messagesByCandidature);
             }
         } else if ("entreprise".equals(userType)) {
             Entreprise entreprise = entrepriseService.getEntrepriseById(uid);
@@ -74,15 +72,16 @@ public class MessageController {
                 modelAndView.addObject("entreprise", entreprise);
                 modelAndView.addObject("isEntreprise", true);
                 
-                // Une Map pour stocker les messages par offre
-                Map<Integer, List<Object>> messagesByOffre = new HashMap<>();
-                
+                // Créer les listes distinctes pour chaque offre
                 for (OffreEmploi offre : entreprise.getOffreEmplois()) {
-                    messagesByOffre.put(offre.getIdOffreEmploi(),
-                        messageService.getAllMessagesForOffreEmploi(offre));
+                    int idOffre = offre.getIdOffreEmploi();
+                    // Messages reçus = MessageCandidature
+                    modelAndView.addObject("receivedMessages_" + idOffre, 
+                            messageService.findCandidatureMessagesByOffreEmploi(offre));
+                    // Messages envoyés = MessageOffre
+                    modelAndView.addObject("sentMessages_" + idOffre, 
+                            messageService.findOffreMessagesByOffreEmploi(offre));
                 }
-                
-                modelAndView.addObject("messagesByOffre", messagesByOffre);
             }
         } else {
             return new ModelAndView("redirect:/error/403");
