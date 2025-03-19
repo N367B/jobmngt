@@ -2,9 +2,6 @@ package fr.atlantique.imt.inf211.jobmngt.service;
 
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
-import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
-
-import java.util.List;
 import java.util.Map;
 
 public interface PageService {

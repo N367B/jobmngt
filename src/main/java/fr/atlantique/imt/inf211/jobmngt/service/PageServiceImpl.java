@@ -2,13 +2,11 @@ package fr.atlantique.imt.inf211.jobmngt.service;
 
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
-import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service

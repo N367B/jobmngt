@@ -1,11 +1,8 @@
 package fr.atlantique.imt.inf211.jobmngt.controller;
 
-import fr.atlantique.imt.inf211.jobmngt.dto.candidature.CandidatureDTO;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
-import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
-import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatureService;
 import fr.atlantique.imt.inf211.jobmngt.service.MessageService;

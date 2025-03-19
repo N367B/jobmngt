@@ -8,13 +8,11 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
-import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -139,11 +137,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
         }
         return false;
     }
-    /*
-    @Override
-    public List<OffreEmploi> getMatchingOffres(Candidature candidature) {
-        return offreEmploiDao.findMatchingCandidature(candidature);
-    }*/
+
     @Override
     public List<OffreEmploi> getMatchingOffres(Candidature candidature) {
         // Au lieu d'utiliser offreEmploiDao.findMatchingCandidature(candidature)

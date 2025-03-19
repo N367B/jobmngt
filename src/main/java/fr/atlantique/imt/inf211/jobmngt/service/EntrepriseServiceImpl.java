@@ -4,7 +4,6 @@ import fr.atlantique.imt.inf211.jobmngt.dao.AppUserDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.EntrepriseDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
-import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

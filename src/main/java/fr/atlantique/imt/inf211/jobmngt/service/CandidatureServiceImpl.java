@@ -39,42 +39,6 @@ public class CandidatureServiceImpl implements CandidatureService {
     public Candidature getCandidatureById(int id) {
         return candidatureDao.findById(id);
     }
-
-    /*
-    @Override
-    public Candidature getCandidatureById(int id) {
-        Candidature candidature = candidatureDao.findById(id);
-        
-        // Force l'initialisation des propriétés lazy loaded
-        if (candidature != null) {
-            // Initialiser le candidat et ses propriétés
-            if (candidature.getCandidat() != null) {
-                // Accéder aux propriétés pour forcer l'initialisation
-                String firstName = candidature.getCandidat().getFirstName();
-                String lastName = candidature.getCandidat().getLastName();
-                
-                // Force l'initialisation de l'utilisateur associé
-                if (candidature.getCandidat().getAppUser() != null) {
-                    String city = candidature.getCandidat().getAppUser().getCity();
-                }
-            }
-            
-            // Force l'initialisation du niveau de qualification
-            if (candidature.getQualificationLevel() != null) {
-                String label = candidature.getQualificationLevel().getLabelQualification();
-            }
-            
-            // Force l'initialisation des secteurs
-            if (candidature.getSectors() != null && !candidature.getSectors().isEmpty()) {
-                candidature.getSectors().size(); // Force l'initialisation de la collection
-                for (Sector sector : candidature.getSectors()) {
-                    String labelSecteur = sector.getLabelSecteur();
-                }
-            }
-        }
-        
-        return candidature;
-    }*/
     
     @Override
     public long countCandidatures() {
@@ -132,14 +96,8 @@ public class CandidatureServiceImpl implements CandidatureService {
         return listCandidatures();
     }
 
-    /*
     @Override
     public List<Candidature> getMatchingCandidatures(OffreEmploi offre) {
-        return candidatureDao.findMatchingOffreEmploi(offre);
-    }*/
-    @Override
-    public List<Candidature> getMatchingCandidatures(OffreEmploi offre) {
-        // Au lieu d'utiliser candidatureDao.findMatchingOffreEmploi(offre)
         List<Candidature> allCandidatures = candidatureDao.findAll();
         List<Candidature> matchingCandidatures = new ArrayList<>();
         
@@ -226,9 +184,7 @@ public class CandidatureServiceImpl implements CandidatureService {
 
     @Override
     public String generateCvFilename(Candidature candidature) {
-        String firstName = candidature.getCandidat().getFirstName();
-        String lastName = candidature.getCandidat().getLastName();
         String timestamp = new java.text.SimpleDateFormat("yyyy_MM_dd").format(new Date());
-        return "CV_" + firstName + "_" + lastName + "_" + timestamp + ".pdf";
+        return "CV_" + "_" + timestamp + ".pdf";
     }
 }

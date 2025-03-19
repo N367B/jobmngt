@@ -5,7 +5,6 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
 import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

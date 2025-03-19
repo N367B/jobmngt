@@ -58,9 +58,7 @@ public interface MessageService {
      * Envoie des notifications aux candidats pour une nouvelle offre d'emploi
      */
     int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage);
-    
-    // --- Méthodes consolidées (remplacent les méthodes avec DTOs) ---
-    
+        
     /**
      * Récupère tous les messages associés à une candidature (envoyés et reçus)
      */

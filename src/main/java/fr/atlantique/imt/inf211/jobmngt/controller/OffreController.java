@@ -3,8 +3,6 @@ package fr.atlantique.imt.inf211.jobmngt.controller;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
-import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
-import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
 import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 import fr.atlantique.imt.inf211.jobmngt.service.QualificationLevelService;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Controller
