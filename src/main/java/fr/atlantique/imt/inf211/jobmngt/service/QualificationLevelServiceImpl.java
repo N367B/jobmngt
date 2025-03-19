@@ -1,6 +1,7 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
 import fr.atlantique.imt.inf211.jobmngt.entity.*;
+import jakarta.transaction.Transactional;
 import fr.atlantique.imt.inf211.jobmngt.dao.*;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class QualificationLevelServiceImpl implements QualificationLevelService 
     }
 
     @Override
+    @Transactional
     public void saveQualificationLevel(QualificationLevel qualificationLevel) {
         if (qualificationLevel.getIdQualification() == 0) {
             qualificationLevelDao.persist(qualificationLevel);
@@ -44,6 +46,7 @@ public class QualificationLevelServiceImpl implements QualificationLevelService 
     }
     
     @Override
+    @Transactional
     public boolean deleteQualificationLevel(int id) {
         QualificationLevel qualificationLevel = qualificationLevelDao.findById(id);
         if (qualificationLevel != null) {

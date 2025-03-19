@@ -8,6 +8,8 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -114,6 +116,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     }
 
     @Override
+    @Transactional
     public OffreEmploi saveOffre(OffreEmploi offre) {
         // Définir la date si non fournie
         if (offre.getPublicationDate() == null) {
@@ -129,6 +132,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     }
 
     @Override
+    @Transactional
     public boolean deleteOffre(int id) {
         OffreEmploi offre = offreEmploiDao.findById(id);
         if (offre != null) {
@@ -175,6 +179,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     }
 
     @Override
+    @Transactional
     public OffreEmploi createOffreWithSectors(OffreEmploi offre, List<Integer> selectedSectorIds) {
         // Gérer les secteurs sélectionnés
         if (selectedSectorIds != null && !selectedSectorIds.isEmpty()) {
@@ -193,6 +198,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     }
 
     @Override
+    @Transactional
     public OffreEmploi updateOffreWithSectors(int id, OffreEmploi offre, List<Integer> selectedSectorIds) {
         OffreEmploi existingOffre = getOffreById(id);
         if (existingOffre == null) {

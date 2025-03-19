@@ -3,6 +3,7 @@ package fr.atlantique.imt.inf211.jobmngt.service;
 import fr.atlantique.imt.inf211.jobmngt.dao.MessageCandidatureDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.MessageOffreDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.*;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ public class MessageServiceImpl implements MessageService {
     private CandidatureService candidatureService;
     
     @Override
+    @Transactional
     public MessageCandidature sendMessageToCandidature(Candidature candidature, OffreEmploi offreEmploi, String message) {
         MessageCandidature messageCandidature = new MessageCandidature();
         messageCandidature.setCandidature(candidature);
@@ -51,6 +53,7 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
+    @Transactional
     public int sendNotificationsForApplication(Candidature candidature, String customMessage) {
         int count = 0;
         // Trouver toutes les offres qui correspondent à cette candidature
@@ -66,6 +69,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @Transactional
     public MessageOffre sendMessageToOffre(OffreEmploi offreEmploi, Candidature candidature, String message) {
         MessageOffre messageOffre = new MessageOffre();
         messageOffre.setOffreEmploi(offreEmploi);
@@ -88,6 +92,7 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
+    @Transactional
     public int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage) {
         int count = 0;
         // Trouver toutes les candidatures qui correspondent à cette offre

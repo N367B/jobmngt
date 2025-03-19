@@ -4,6 +4,8 @@ import fr.atlantique.imt.inf211.jobmngt.dao.AppUserDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.EntrepriseDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
 
 
     @Override
+    @Transactional
     public Entreprise saveEntreprise(Entreprise entreprise) {
     // Vérifier si un utilisateur avec cet email existe déjà
     Optional<AppUser> existingUser = appUserDao.findByMail(entreprise.getAppUser().getMail());
@@ -69,6 +72,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     }
 
     @Override
+    @Transactional
     public boolean deleteEntreprise(int id) {
     // Récupérer l'entreprise par son ID
     Entreprise entreprise = entrepriseDao.findById(id);
@@ -89,6 +93,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     }
 
     @Override
+    @Transactional
     public Entreprise createEntreprise(Entreprise entreprise) throws IllegalArgumentException {
         // Validation du mot de passe
         if (entreprise.getAppUser().getPassword() == null || entreprise.getAppUser().getPassword().length() < 4) {
@@ -109,6 +114,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     }
 
     @Override
+    @Transactional
     public Entreprise updateEntreprise(int id, Entreprise updatedEntreprise) throws IllegalArgumentException {
         Entreprise existingEntreprise = getEntrepriseById(id);
         if (existingEntreprise == null) {

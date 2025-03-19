@@ -7,6 +7,7 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,6 +47,7 @@ public class CandidatureServiceImpl implements CandidatureService {
     }
 
     @Override
+    @Transactional
     public Candidature saveCandidature(Candidature candidature) {
         if (candidature.getIdCandidature() == 0) {
             candidatureDao.persist(candidature);
@@ -56,6 +58,7 @@ public class CandidatureServiceImpl implements CandidatureService {
     }
 
     @Override
+    @Transactional
     public boolean deleteCandidature(int id) {
         Candidature candidature = candidatureDao.findById(id);
         if (candidature != null) {
@@ -132,6 +135,7 @@ public class CandidatureServiceImpl implements CandidatureService {
     }
 
     @Override
+    @Transactional
     public Candidature createCandidatureWithSectors(Candidature candidature, List<Integer> selectedSectorIds) {
         // Mise à jour des secteurs sélectionnés
         Set<Sector> sectors = new HashSet<>();
@@ -156,6 +160,7 @@ public class CandidatureServiceImpl implements CandidatureService {
     }
 
     @Override
+    @Transactional
     public Candidature updateCandidatureWithSectors(int id, Candidature formCandidature, List<Integer> selectedSectorIds) {
         // Récupérer la candidature existante
         Candidature existingCandidature = getCandidatureById(id);

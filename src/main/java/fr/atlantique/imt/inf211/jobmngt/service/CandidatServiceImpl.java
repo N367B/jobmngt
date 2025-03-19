@@ -4,6 +4,8 @@ import fr.atlantique.imt.inf211.jobmngt.dao.AppUserDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.CandidatDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,7 @@ public class CandidatServiceImpl implements CandidatService {
     }
 
     @Override
+    @Transactional
     public Candidat saveCandidat(Candidat candidat) {
         // Vérifier si un utilisateur avec cet email existe déjà
         Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
@@ -67,6 +70,7 @@ public class CandidatServiceImpl implements CandidatService {
     }
 
     @Override
+    @Transactional
     public boolean deleteCandidat(int id) {
         // Récupérer le candidat par son ID
         Candidat candidat = candidatDao.findById(id);
@@ -87,6 +91,7 @@ public class CandidatServiceImpl implements CandidatService {
     }
 
     @Override
+    @Transactional
     public Candidat createCandidat(Candidat candidat) throws IllegalArgumentException {
         // Validation du mot de passe
         if (candidat.getAppUser().getPassword() == null || candidat.getAppUser().getPassword().length() < 4) {
@@ -107,6 +112,7 @@ public class CandidatServiceImpl implements CandidatService {
     }
 
     @Override
+    @Transactional
     public Candidat updateCandidat(int id, Candidat candidat) throws IllegalArgumentException {
         Candidat existingCandidat = getCandidatById(id);
         if (existingCandidat == null) {
@@ -137,6 +143,6 @@ public class CandidatServiceImpl implements CandidatService {
         
         // Sauvegarde
         return saveCandidat(candidat);
-}
+    }
 
 }
