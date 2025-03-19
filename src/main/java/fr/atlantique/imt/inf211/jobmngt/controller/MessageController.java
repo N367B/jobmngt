@@ -183,10 +183,56 @@ public class MessageController {
      */
     @GetMapping("/send/application/{applicationId}")
     public ModelAndView sendMessageForApplicationForm(@PathVariable int applicationId, HttpServletRequest request) {
-        // Code existant inchangé
-        // ...
+        ModelAndView modelAndView = new ModelAndView("message/sendMessage");
+        
+        HttpSession session = request.getSession();
+        Integer uid = (Integer) session.getAttribute("uid");
+        String userType = (String) session.getAttribute("usertype");
+        
+        Candidature candidature = candidatureService.getCandidatureById(applicationId);
+        if (candidature == null) {
+            return new ModelAndView("redirect:/applications");
+        }
+        
+        modelAndView.addObject("candidature", candidature);
+        
+        if ("candidat".equals(userType)) {
+            // Vérifier que le candidat est bien le propriétaire de la candidature
+            if (!authService.checkCandidatAccess(session, candidature.getCandidat().getIdCandidat())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            // Le candidat peut envoyer des messages concernant sa candidature à des offres correspondantes
+            List<OffreEmploi> matchingOffres = offreEmploiService.getMatchingOffres(candidature);
+            modelAndView.addObject("candidat", candidature.getCandidat());
+            modelAndView.addObject("isCandidat", true);
+            modelAndView.addObject("matchingOffres", matchingOffres);
+            return modelAndView;
+        } else if ("entreprise".equals(userType)) {
+            // Une entreprise peut consulter une candidature et envoyer un message si elle est liée à l'une de ses offres
+            Entreprise entreprise = entrepriseService.getEntrepriseById(uid);
+            if (entreprise != null) {
+                List<OffreEmploi> entrepriseOffres = offreEmploiService.findByEntreprise(entreprise);
+                boolean hasMatchingOffer = false;
+                for (OffreEmploi offre : entrepriseOffres) {
+                    if (candidatureService.isMatchingOffreEmploi(candidature, offre)) {
+                        hasMatchingOffer = true;
+                        break;
+                    }
+                }
+                
+                if (hasMatchingOffer) {
+                    modelAndView.addObject("entreprise", entreprise);
+                    modelAndView.addObject("isEntreprise", true);
+                    modelAndView.addObject("entrepriseOffres", entrepriseOffres);
+                    return modelAndView;
+                }
+            }
+        }
+        
         return new ModelAndView("redirect:/error/403");
     }
+
     
     /**
      * Traiter l'envoi d'un message à propos d'une candidature
@@ -197,10 +243,41 @@ public class MessageController {
             @RequestParam("offreId") Integer offreId,
             @RequestParam("message") String message,
             HttpServletRequest request) {
-        // Code existant inchangé
-        // ...
+        
+        HttpSession session = request.getSession();
+        Integer uid = (Integer) session.getAttribute("uid");
+        String userType = (String) session.getAttribute("usertype");
+        
+        Candidature candidature = candidatureService.getCandidatureById(applicationId);
+        OffreEmploi offre = offreEmploiService.getOffreById(offreId);
+        
+        if (offre == null || candidature == null) {
+            return new ModelAndView("redirect:/applications");
+        }
+        
+        if ("candidat".equals(userType)) {
+            // Vérifier que le candidat est bien le propriétaire de la candidature
+            if (!authService.checkCandidatAccess(session, candidature.getCandidat().getIdCandidat())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            // Envoi message candidat vers entreprise
+            MessageCandidature messageCandidature = messageService.sendMessageToCandidature(candidature, offre, message);
+            return new ModelAndView("redirect:/messages?sent=true&id=" + messageCandidature.getIdMessageCandidature());
+        } else if ("entreprise".equals(userType)) {
+            // Vérifier que l'entreprise est bien la propriétaire de l'offre
+            if (!authService.checkEntrepriseAccess(session, offre.getEntreprise().getIdEntreprise())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            // Envoi message entreprise vers candidat
+            MessageOffre messageOffre = messageService.sendMessageToOffre(offre, candidature, message);
+            return new ModelAndView("redirect:/messages?sent=true&id=" + messageOffre.getIdMessageOffre());
+        }
+        
         return new ModelAndView("redirect:/error/403");
     }
+
     
     /**
      * Voir les détails d'un message d'une candidature
@@ -241,10 +318,35 @@ public class MessageController {
      */
     @GetMapping("/offre/{id}")
     public ModelAndView viewOffreMessage(@PathVariable int id, HttpServletRequest request) {
-        // Code existant inchangé
-        // ...
-        return new ModelAndView("redirect:/error/403");
+        ModelAndView modelAndView = new ModelAndView("message/messageView");
+        
+        HttpSession session = request.getSession();
+        Integer uid = (Integer) session.getAttribute("uid");
+        String userType = (String) session.getAttribute("usertype");
+        
+        MessageOffre message = messageService.getMessageOffreById(id);
+        if (message == null) {
+            return new ModelAndView("redirect:/messages");
+        }
+        
+        // Vérifier que l'utilisateur a le droit de voir ce message
+        if ("candidat".equals(userType)) {
+            if (!authService.checkCandidatAccess(session, message.getCandidature().getCandidat().getIdCandidat())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+        } else if ("entreprise".equals(userType)) {
+            if (message.getOffreEmploi() == null || !authService.checkEntrepriseAccess(session, message.getOffreEmploi().getEntreprise().getIdEntreprise())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+        } else {
+            return new ModelAndView("redirect:/error/403");
+        }
+        
+        modelAndView.addObject("message", message);
+        modelAndView.addObject("isOffreMessage", true);
+        return modelAndView;
     }
+
 
     /**
      * Affiche le formulaire pour répondre à un message
@@ -254,10 +356,26 @@ public class MessageController {
             @RequestParam("offreId") Integer offreId,
             @RequestParam("candidatureId") Integer candidatureId,
             HttpServletRequest request) {
-        // Code existant inchangé
-        // ...
-        return new ModelAndView("redirect:/error/403");
+        
+        ModelAndView modelAndView = new ModelAndView("message/sendMessage");
+        
+        HttpSession session = request.getSession();
+        String userType = (String) session.getAttribute("usertype");
+        
+        Candidature candidature = candidatureService.getCandidatureById(candidatureId);
+        OffreEmploi offre = offreEmploiService.getOffreById(offreId);
+        
+        if (offre == null || candidature == null) {
+            return new ModelAndView("redirect:/messages");
+        }
+        
+        modelAndView.addObject("messageReply", true);
+        modelAndView.addObject("offre", offre);
+        modelAndView.addObject("candidature", candidature);
+        
+        return modelAndView;
     }
+
     
     /**
      * Traiter l'envoi d'une réponse à un message existant
@@ -268,8 +386,37 @@ public class MessageController {
             @RequestParam("candidatureId") Integer candidatureId,
             @RequestParam("message") String message,
             HttpServletRequest request) {
-        // Code existant inchangé
-        // ...
+        
+        HttpSession session = request.getSession();
+        String userType = (String) session.getAttribute("usertype");
+        
+        Candidature candidature = candidatureService.getCandidatureById(candidatureId);
+        OffreEmploi offre = offreEmploiService.getOffreById(offreId);
+        
+        if (offre == null || candidature == null) {
+            return new ModelAndView("redirect:/messages");
+        }
+        
+        // Selon le type d'utilisateur, envoyer le message approprié
+        if ("candidat".equals(userType)) {
+            // Vérifier accès
+            if (!authService.checkCandidatAccess(session, candidature.getCandidat().getIdCandidat())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            MessageCandidature messageCandidature = messageService.sendMessageToCandidature(candidature, offre, message);
+            return new ModelAndView("redirect:/messages?sent=true&id=" + messageCandidature.getIdMessageCandidature());
+        } else if ("entreprise".equals(userType)) {
+            // Vérifier accès
+            if (!authService.checkEntrepriseAccess(session, offre.getEntreprise().getIdEntreprise())) {
+                return new ModelAndView("redirect:/error/403");
+            }
+            
+            MessageOffre messageOffre = messageService.sendMessageToOffre(offre, candidature, message);
+            return new ModelAndView("redirect:/messages?sent=true&id=" + messageOffre.getIdMessageOffre());
+        }
+        
         return new ModelAndView("redirect:/error/403");
     }
+
 }
