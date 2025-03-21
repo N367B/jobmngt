@@ -9,39 +9,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
-import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
-import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
-import fr.atlantique.imt.inf211.jobmngt.service.*;
+import fr.atlantique.imt.inf211.jobmngt.service.PageService;
+import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-import java.util.List;
+import java.util.Map;
 
 @Controller
 public class PagesController {
 
     @Autowired
-    private EntrepriseService entrepriseService;
-
-    @Autowired
-    private CandidatService candidatService;
+    private PageService pageService;
     
     @Autowired
     private OffreEmploiService offreEmploiService;
-    
-    @Autowired
-    private CandidatureService candidatureService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView welcomePage(HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("index");
 
-        // Statistiques globales
-        modelAndView.addObject("countCompanies", entrepriseService.countEntreprises());
-        modelAndView.addObject("countCandidates", candidatService.countCandidats());
-        modelAndView.addObject("countJobs", offreEmploiService.countOffres());
-        modelAndView.addObject("countApplications", candidatureService.countCandidatures());
+        // Récupérer les statistiques globales depuis le service
+        Map<String, Long> statistics = pageService.getGlobalStatistics();
+        
+        // Ajouter les statistiques au modèle
+        for (Map.Entry<String, Long> entry : statistics.entrySet()) {
+            modelAndView.addObject(entry.getKey(), entry.getValue());
+        }
         
         // Récupérer les informations de session
         HttpSession session = request.getSession();
@@ -51,16 +46,13 @@ public class PagesController {
         // Affichage spécifique selon le type d'utilisateur
         if (uid != null) {
             if ("entreprise".equals(userType)) {
-                // Si c'est une entreprise, afficher ses offres d'emploi
-                Entreprise entreprise = entrepriseService.getEntrepriseById(uid);
+                Entreprise entreprise = pageService.getEntrepriseWithOffers(uid);
                 if (entreprise != null) {
-                    List<OffreEmploi> offres = offreEmploiService.findByEntreprise(entreprise);
-                    modelAndView.addObject("userCompany", entreprise);
-                    modelAndView.addObject("userOffers", offres);
+                    //modelAndView.addObject("userCompany", entreprise);
+                    modelAndView.addObject("userOffers", offreEmploiService.findByEntreprise(entreprise));
                 }
             } else if ("candidat".equals(userType)) {
-                // Si c'est un candidat, afficher ses candidatures
-                Candidat candidat = candidatService.getCandidatById(uid);
+                Candidat candidat = pageService.getCandidatInfo(uid);
                 if (candidat != null) {
                     modelAndView.addObject("userCandidate", candidat);
                 }

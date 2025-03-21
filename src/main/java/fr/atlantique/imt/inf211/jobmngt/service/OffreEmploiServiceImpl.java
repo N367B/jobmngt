@@ -8,13 +8,15 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
 import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
 import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
-import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -28,6 +30,10 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     
     @Autowired
     private QualificationLevelDao qualificationLevelDao;
+
+    @Autowired
+    @Lazy
+    private MessageService messageService;
 
     @Override
     public List<OffreEmploi> listOffres() {
@@ -110,6 +116,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     }
 
     @Override
+    @Transactional
     public OffreEmploi saveOffre(OffreEmploi offre) {
         // Définir la date si non fournie
         if (offre.getPublicationDate() == null) {
@@ -125,6 +132,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
     }
 
     @Override
+    @Transactional
     public boolean deleteOffre(int id) {
         OffreEmploi offre = offreEmploiDao.findById(id);
         if (offre != null) {
@@ -133,11 +141,7 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
         }
         return false;
     }
-    /*
-    @Override
-    public List<OffreEmploi> getMatchingOffres(Candidature candidature) {
-        return offreEmploiDao.findMatchingCandidature(candidature);
-    }*/
+
     @Override
     public List<OffreEmploi> getMatchingOffres(Candidature candidature) {
         // Au lieu d'utiliser offreEmploiDao.findMatchingCandidature(candidature)
@@ -172,6 +176,58 @@ public class OffreEmploiServiceImpl implements OffreEmploiService {
         }
         
         return false;
+    }
+
+    @Override
+    @Transactional
+    public OffreEmploi createOffreWithSectors(OffreEmploi offre, List<Integer> selectedSectorIds) {
+        // Gérer les secteurs sélectionnés
+        if (selectedSectorIds != null && !selectedSectorIds.isEmpty()) {
+            HashSet<Sector> sectors = new HashSet<>();
+            for (Integer sectorId : selectedSectorIds) {
+                Sector sector = sectorDao.findById(sectorId);
+                if (sector != null) {
+                    sectors.add(sector);
+                }
+            }
+            offre.setSectors(sectors);
+        }
+        
+        // Sauvegarder l'offre
+        return saveOffre(offre);
+    }
+
+    @Override
+    @Transactional
+    public OffreEmploi updateOffreWithSectors(int id, OffreEmploi offre, List<Integer> selectedSectorIds) {
+        OffreEmploi existingOffre = getOffreById(id);
+        if (existingOffre == null) {
+            throw new IllegalArgumentException("Offre non trouvée avec l'ID: " + id);
+        }
+        
+        // Préserver l'ID et l'entreprise
+        offre.setIdOffreEmploi(id);
+        offre.setEntreprise(existingOffre.getEntreprise());
+        
+        // Gérer les secteurs sélectionnés
+        if (selectedSectorIds != null && !selectedSectorIds.isEmpty()) {
+            HashSet<Sector> sectors = new HashSet<>();
+            for (Integer sectorId : selectedSectorIds) {
+                Sector sector = sectorDao.findById(sectorId);
+                if (sector != null) {
+                    sectors.add(sector);
+                }
+            }
+            offre.setSectors(sectors);
+        }
+        
+        // Sauvegarder l'offre
+        return saveOffre(offre);
+    }
+
+    @Override
+    public int sendNotificationsForJob(OffreEmploi offre, String message) {
+        return messageService.sendNotificationsForJob(offre, message);
     }
 
 }

@@ -19,4 +19,10 @@ public interface OffreEmploiService {
     boolean deleteOffre(int id);
     List<OffreEmploi> getMatchingOffres(Candidature candidature);
     boolean isMatchingCandidature(OffreEmploi offre, Candidature candidature);
+    OffreEmploi createOffreWithSectors(OffreEmploi offre, List<Integer> selectedSectorIds);
+    OffreEmploi updateOffreWithSectors(int id, OffreEmploi offre, List<Integer> selectedSectorIds);
+    int sendNotificationsForJob(OffreEmploi offre, String message);
+
+
+
 }

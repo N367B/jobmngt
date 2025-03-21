@@ -5,7 +5,6 @@ import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
 import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
 import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -59,25 +58,15 @@ public class CandidatController {
     public ModelAndView createCandidate(@ModelAttribute Candidat candidate) {
         ModelAndView modelAndView = new ModelAndView();
         
-        // Vérification de la longueur du mot de passe
-        if (candidate.getAppUser().getPassword() == null || candidate.getAppUser().getPassword().length() < 4) {
-            modelAndView.setViewName("candidate/candidateForm");
-            modelAndView.addObject("candidate", candidate);
-            modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
-            modelAndView.addObject("action", "create");
-            return modelAndView;
-        }
-        
         try {
-            candidate.getAppUser().setUserType("candidat");
-            Candidat savedCandidate = candidatService.saveCandidat(candidate);
-            //return new ModelAndView("redirect:/candidates/" + savedCandidate.getIdCandidat());
+            // Délégation de la validation et création au service
+            Candidat savedCandidate = candidatService.createCandidat(candidate);
             return new ModelAndView("redirect:/candidates");
         } catch (IllegalArgumentException e) {
-            // Capture l'exception lancée quand l'email existe déjà
+            // Gestion des erreurs de validation
             modelAndView.setViewName("candidate/candidateForm");
             modelAndView.addObject("candidate", candidate);
-            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
+            modelAndView.addObject("error", e.getMessage());
             modelAndView.addObject("action", "create");
             return modelAndView;
         } catch (Exception e) {
@@ -110,55 +99,35 @@ public class CandidatController {
         return modelAndView;
     }
 
-    @PostMapping("/{id}/edit")
-    public ModelAndView updateCandidate(@PathVariable int id, @ModelAttribute Candidat candidate, HttpServletRequest request) {
-        // Vérification des permissions
-        if (!authService.checkCandidatAccess(request.getSession(), id)) {
-            return new ModelAndView("redirect:/error/403");
-        }
-        
-        Candidat existingCandidate = candidatService.getCandidatById(id);
-        ModelAndView modelAndView = new ModelAndView();
-        
-        // Vérification du mot de passe si fourni
-        String password = candidate.getAppUser().getPassword();
-        if (password != null && !password.isEmpty()) {
-            if (password.length() < 4) {
-                modelAndView.setViewName("candidate/candidateForm");
-                modelAndView.addObject("candidate", candidate);
-                modelAndView.addObject("error", "Le mot de passe doit contenir au moins 4 caractères.");
-                modelAndView.addObject("action", "edit");
-                return modelAndView;
-            }
-        } else {
-            // Si aucun mot de passe n'est fourni, conserver l'ancien
-            candidate.getAppUser().setPassword(existingCandidate.getAppUser().getPassword());
-        }
-        
-        // Configuration des IDs
-        candidate.setIdCandidat(id);
-        candidate.getAppUser().setIdUser(existingCandidate.getAppUser().getIdUser());
-        candidate.getAppUser().setUserType("candidat");
-        
-        try {
-            candidatService.saveCandidat(candidate);
-            return new ModelAndView("redirect:/candidates/" + id);
-        } catch (IllegalArgumentException e) {
-            // Capture l'exception lancée quand l'email existe déjà
-            modelAndView.setViewName("candidate/candidateForm");
-            modelAndView.addObject("candidate", candidate);
-            modelAndView.addObject("error", "Un utilisateur avec cet email existe déjà.");
-            modelAndView.addObject("action", "edit");
-            return modelAndView;
-        } catch (Exception e) {
-            // Pour les autres erreurs
-            modelAndView.setViewName("candidate/candidateForm");
-            modelAndView.addObject("candidate", candidate);
-            modelAndView.addObject("error", "Une erreur est survenue lors de la mise à jour du candidat : " + e.getMessage());
-            modelAndView.addObject("action", "edit");
-            return modelAndView;
-        }
+@PostMapping("/{id}/edit")
+public ModelAndView updateCandidate(@PathVariable int id, @ModelAttribute Candidat candidate, HttpServletRequest request) {
+    // Vérification des permissions
+    if (!authService.checkCandidatAccess(request.getSession(), id)) {
+        return new ModelAndView("redirect:/error/403");
     }
+    
+    ModelAndView modelAndView = new ModelAndView();
+    
+    try {
+        // Délégation de la validation et mise à jour au service
+        candidatService.updateCandidat(id, candidate);
+        return new ModelAndView("redirect:/candidates/" + id);
+    } catch (IllegalArgumentException e) {
+        // Gestion des erreurs de validation
+        modelAndView.setViewName("candidate/candidateForm");
+        modelAndView.addObject("candidate", candidate);
+        modelAndView.addObject("error", e.getMessage());
+        modelAndView.addObject("action", "edit");
+        return modelAndView;
+    } catch (Exception e) {
+        // Pour les autres erreurs
+        modelAndView.setViewName("candidate/candidateForm");
+        modelAndView.addObject("candidate", candidate);
+        modelAndView.addObject("error", "Une erreur est survenue lors de la mise à jour du candidat : " + e.getMessage());
+        modelAndView.addObject("action", "edit");
+        return modelAndView;
+    }
+}
 
     @GetMapping("/{id}/delete")
     public ModelAndView deleteCandidate(@PathVariable int id, HttpServletRequest request) {

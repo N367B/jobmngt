@@ -4,8 +4,8 @@ import fr.atlantique.imt.inf211.jobmngt.dao.AppUserDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.CandidatDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.AppUser;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
-import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
-import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,24 +36,8 @@ public class CandidatServiceImpl implements CandidatService {
         return candidatDao.findAll().size();
     }
 
-/*@Override
-public Candidat saveCandidat(Candidat candidat) {
-    // Vérifier si un utilisateur (candidat OU entreprise) avec cet email existe déjà
-    Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
-    
-    if (existingUser.isPresent()) {
-        throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur.");
-    }
-    
-    if (candidat.getIdCandidat() == 0) {
-        candidatDao.persist(candidat);
-    } else {
-        candidat = candidatDao.merge(candidat);
-    }
-    return candidat;
-}*/
-
     @Override
+    @Transactional
     public Candidat saveCandidat(Candidat candidat) {
         // Vérifier si un utilisateur avec cet email existe déjà
         Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
@@ -86,6 +70,7 @@ public Candidat saveCandidat(Candidat candidat) {
     }
 
     @Override
+    @Transactional
     public boolean deleteCandidat(int id) {
         // Récupérer le candidat par son ID
         Candidat candidat = candidatDao.findById(id);
@@ -103,6 +88,61 @@ public Candidat saveCandidat(Candidat candidat) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public Candidat createCandidat(Candidat candidat) throws IllegalArgumentException {
+        // Validation du mot de passe
+        if (candidat.getAppUser().getPassword() == null || candidat.getAppUser().getPassword().length() < 4) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 4 caractères.");
+        }
+        
+        // Vérification de l'email
+        Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
+        }
+        
+        // Configuration du type d'utilisateur
+        candidat.getAppUser().setUserType("candidat");
+        
+        // Sauvegarde
+        return saveCandidat(candidat);
+    }
+
+    @Override
+    @Transactional
+    public Candidat updateCandidat(int id, Candidat candidat) throws IllegalArgumentException {
+        Candidat existingCandidat = getCandidatById(id);
+        if (existingCandidat == null) {
+            throw new IllegalArgumentException("Candidat non trouvé");
+        }
+        
+        // Validation du mot de passe s'il est fourni
+        String password = candidat.getAppUser().getPassword();
+        if (password != null && !password.isEmpty()) {
+            if (password.length() < 4) {
+                throw new IllegalArgumentException("Le mot de passe doit contenir au moins 4 caractères.");
+            }
+        } else {
+            // Conserver l'ancien mot de passe
+            candidat.getAppUser().setPassword(existingCandidat.getAppUser().getPassword());
+        }
+        
+        // Vérification de l'email
+        Optional<AppUser> existingUser = appUserDao.findByMail(candidat.getAppUser().getMail());
+        if (existingUser.isPresent() && existingUser.get().getIdUser() != existingCandidat.getAppUser().getIdUser()) {
+            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
+        }
+        
+        // Configuration des IDs
+        candidat.setIdCandidat(id);
+        candidat.getAppUser().setIdUser(existingCandidat.getAppUser().getIdUser());
+        candidat.getAppUser().setUserType("candidat");
+        
+        // Sauvegarde
+        return saveCandidat(candidat);
     }
 
 }

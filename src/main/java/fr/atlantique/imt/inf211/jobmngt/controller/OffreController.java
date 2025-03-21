@@ -3,8 +3,6 @@ package fr.atlantique.imt.inf211.jobmngt.controller;
 import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
 import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
 import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
-import fr.atlantique.imt.inf211.jobmngt.entity.QualificationLevel;
-import fr.atlantique.imt.inf211.jobmngt.entity.Sector;
 import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
 import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
 import fr.atlantique.imt.inf211.jobmngt.service.QualificationLevelService;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Controller
@@ -121,36 +118,21 @@ public class OffreController {
         // Associer l'entreprise à l'offre
         job.setEntreprise(entreprise);
         
-        // Gérer les secteurs sélectionnés
-        if (selectedSectorIds != null && !selectedSectorIds.isEmpty()) {
-            HashSet<Sector> sectors = new HashSet<>();
-            for (Integer sectorId : selectedSectorIds) {
-                Sector sector = sectorService.getSectorById(sectorId);
-                if (sector != null) {
-                    sectors.add(sector);
-                }
-            }
-            job.setSectors(sectors);
-        }
-        
         try {
-            OffreEmploi savedJob = offreEmploiService.saveOffre(job);
-            System.out.println("Offre créée avec ID: " + savedJob.getIdOffreEmploi());
-            System.out.println("Message de notification reçu: " + (notificationMessage != null ? notificationMessage : "null"));
+            // Déléguer au service la création avec gestion des secteurs
+            OffreEmploi savedJob = offreEmploiService.createOffreWithSectors(job, selectedSectorIds);
             
+            // Gérer les notifications si nécessaire
             if (notificationMessage != null && !notificationMessage.trim().isEmpty()) {
-                System.out.println("Tentative d'envoi de notifications pour l'offre " + savedJob.getIdOffreEmploi());
                 try {
-                    int notificationCount = messageService.sendNotificationsForJob(savedJob, notificationMessage);
-                    System.out.println("Nombre de notifications envoyées: " + notificationCount);
+                    int notificationCount = offreEmploiService.sendNotificationsForJob(savedJob, notificationMessage);
                     return new ModelAndView("redirect:/jobs/notification-result?id=" + savedJob.getIdOffreEmploi() + "&count=" + notificationCount);
                 } catch (Exception e) {
+                    // Continuer même si l'envoi échoue, juste logger l'erreur
                     System.err.println("ERREUR lors de l'envoi des notifications: " + e.getMessage());
-                    e.printStackTrace();
                 }
-            } else {
-                System.out.println("Aucun message de notification fourni ou message vide");
             }
+            
             return new ModelAndView("redirect:/jobs/" + savedJob.getIdOffreEmploi());
         } catch (Exception e) {
             ModelAndView modelAndView = new ModelAndView("job/jobForm");
@@ -188,30 +170,20 @@ public class OffreController {
                                  @ModelAttribute OffreEmploi job, 
                                  @RequestParam("selectedSectors") List<Integer> selectedSectorIds,
                                  HttpServletRequest request) {
-
+    
         OffreEmploi existingJob = offreEmploiService.getOffreById(id);
+        if (existingJob == null) {
+            return new ModelAndView("redirect:/jobs");
+        }
+        
         if (!authenticationService.checkEntrepriseAccess(request.getSession(), existingJob.getEntreprise().getIdEntreprise())) {
             return new ModelAndView("redirect:/error/403");
         }
-        // Préserver l'ID et l'entreprise
-        job.setIdOffreEmploi(id);
-        job.setEntreprise(existingJob.getEntreprise());
-        
-        // Gérer les secteurs sélectionnés
-        if (selectedSectorIds != null && !selectedSectorIds.isEmpty()) {
-            HashSet<Sector> sectors = new HashSet<>();
-            for (Integer sectorId : selectedSectorIds) {
-                Sector sector = sectorService.getSectorById(sectorId);
-                if (sector != null) {
-                    sectors.add(sector);
-                }
-            }
-            job.setSectors(sectors);
-        }
         
         try {
-            offreEmploiService.saveOffre(job);
-            return new ModelAndView("redirect:/jobs/" + id);
+            // Déléguer la mise à jour au service
+            OffreEmploi updatedJob = offreEmploiService.updateOffreWithSectors(id, job, selectedSectorIds);
+            return new ModelAndView("redirect:/jobs/" + updatedJob.getIdOffreEmploi());
         } catch (Exception e) {
             ModelAndView modelAndView = new ModelAndView("job/jobForm");
             modelAndView.addObject("job", job);
@@ -222,7 +194,6 @@ public class OffreController {
             return modelAndView;
         }
     }
-
     @GetMapping("/{id}/delete")
     public ModelAndView deleteJob(@PathVariable int id, HttpServletRequest request) {
         if (!authenticationService.checkEntrepriseAccess(request.getSession(), offreEmploiService.getOffreById(id).getEntreprise().getIdEntreprise())) {
@@ -232,26 +203,7 @@ public class OffreController {
         offreEmploiService.deleteOffre(id);
         return new ModelAndView("redirect:/jobs");
     }
-    /*
-    @GetMapping("/search")
-    public ModelAndView searchJobs(@RequestParam(required = false) String sector, 
-                                  @RequestParam(required = false) String qualification) {
-        ModelAndView modelAndView = new ModelAndView("job/jobList");
-        List<OffreEmploi> jobs;
-        
-        if (sector != null && !sector.isEmpty() && qualification != null && !qualification.isEmpty()) {
-            jobs = offreEmploiService.searchOffres(sector, qualification);
-        } else {
-            jobs = offreEmploiService.listOffres();
-        }
-        
-        modelAndView.addObject("jobslist", jobs);
-        modelAndView.addObject("sectors", sectorService.listOfSectors());
-        modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());
-        modelAndView.addObject("selectedSector", sector);
-        modelAndView.addObject("selectedQualification", qualification);
-        return modelAndView;
-    }*/
+
 
     @GetMapping("/search")
     public ModelAndView searchJobs(
