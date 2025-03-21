@@ -1,30 +1,71 @@
 package fr.atlantique.imt.inf211.jobmngt.service;
 
 import fr.atlantique.imt.inf211.jobmngt.entity.*;
-import fr.atlantique.imt.inf211.jobmngt.dto.common.MessageDTO;
-
 import java.util.List;
 
 public interface MessageService {
     
-    // Méthodes pour MessageCandidature (messages de candidats vers entreprises)
+    // --- Méthodes pour MessageCandidature (messages de candidats vers entreprises) ---
+    
+    /**
+     * Envoie un message d'un candidat vers une entreprise concernant une candidature
+     */
     MessageCandidature sendMessageToCandidature(Candidature candidature, OffreEmploi offreEmploi, String message);
+    
+    /**
+     * Récupère les messages envoyés par un candidat pour une candidature spécifique
+     */
     List<MessageCandidature> findCandidatureMessagesByCandidature(Candidature candidature);
+    
+    /**
+     * Récupère les messages concernant une offre d'emploi spécifique
+     */
     List<MessageCandidature> findCandidatureMessagesByOffreEmploi(OffreEmploi offreEmploi);
-    int sendNotificationsForApplication(Candidature candidature);
+    
+    /**
+     * Récupère un message par son ID
+     */
     MessageCandidature getMessageCandidatureById(int id);
-
-    // Dans MessageService.java
+    
+    /**
+     * Envoie des notifications aux entreprises pour une nouvelle candidature
+     */
     int sendNotificationsForApplication(Candidature candidature, String customMessage);
-    int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage);
-    // Méthodes pour MessageOffre (messages d'entreprises vers candidats)
+    
+    // --- Méthodes pour MessageOffre (messages d'entreprises vers candidats) ---
+    
+    /**
+     * Envoie un message d'une entreprise vers un candidat concernant une offre
+     */
     MessageOffre sendMessageToOffre(OffreEmploi offreEmploi, Candidature candidature, String message);
+    
+    /**
+     * Récupère les messages reçus par un candidat pour une candidature spécifique
+     */
     List<MessageOffre> findOffreMessagesByCandidature(Candidature candidature);
+    
+    /**
+     * Récupère les messages envoyés par une entreprise pour une offre spécifique
+     */
     List<MessageOffre> findOffreMessagesByOffreEmploi(OffreEmploi offreEmploi);
-    int sendNotificationsForJob(OffreEmploi offreEmploi);
+    
+    /**
+     * Récupère un message par son ID
+     */
     MessageOffre getMessageOffreById(int id);
     
-    // Méthodes génériques pour tous les messages (conversion vers DTO)
-    List<MessageDTO> getAllMessagesForCandidature(Candidature candidature);
-    List<MessageDTO> getAllMessagesForOffreEmploi(OffreEmploi offreEmploi);
+    /**
+     * Envoie des notifications aux candidats pour une nouvelle offre d'emploi
+     */
+    int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage);
+        
+    /**
+     * Récupère tous les messages associés à une candidature (envoyés et reçus)
+     */
+    List<Object> getAllMessagesForCandidature(Candidature candidature);
+    
+    /**
+     * Récupère tous les messages associés à une offre d'emploi (envoyés et reçus)
+     */
+    List<Object> getAllMessagesForOffreEmploi(OffreEmploi offreEmploi);
 }

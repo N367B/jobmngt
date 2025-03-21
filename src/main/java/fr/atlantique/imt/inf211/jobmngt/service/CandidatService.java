@@ -9,4 +9,7 @@ public interface CandidatService {
     long countCandidats();
     Candidat saveCandidat(Candidat candidat);
     boolean deleteCandidat(int id);
+    Candidat createCandidat(Candidat candidat) throws IllegalArgumentException;
+    Candidat updateCandidat(int id, Candidat candidat) throws IllegalArgumentException;
+    
 }

@@ -1,17 +1,7 @@
 package fr.atlantique.imt.inf211.jobmngt.controller;
 
-import fr.atlantique.imt.inf211.jobmngt.entity.Candidat;
-import fr.atlantique.imt.inf211.jobmngt.entity.Candidature;
-import fr.atlantique.imt.inf211.jobmngt.entity.Entreprise;
-import fr.atlantique.imt.inf211.jobmngt.entity.OffreEmploi;
-import fr.atlantique.imt.inf211.jobmngt.entity.MessageCandidature;
-import fr.atlantique.imt.inf211.jobmngt.entity.MessageOffre;
-import fr.atlantique.imt.inf211.jobmngt.service.CandidatService;
-import fr.atlantique.imt.inf211.jobmngt.service.CandidatureService;
-import fr.atlantique.imt.inf211.jobmngt.service.EntrepriseService;
-import fr.atlantique.imt.inf211.jobmngt.service.OffreEmploiService;
-import fr.atlantique.imt.inf211.jobmngt.service.AuthenticationService;
-import fr.atlantique.imt.inf211.jobmngt.service.MessageService;
+import fr.atlantique.imt.inf211.jobmngt.entity.*;
+import fr.atlantique.imt.inf211.jobmngt.service.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -21,8 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -47,9 +35,6 @@ public class MessageController {
     @Autowired
     private AuthenticationService authService;
     
-    /**
-     * Liste tous les messages pour l'utilisateur connecté
-     */
     @GetMapping
     public ModelAndView listMessages(HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("message/messageList");
@@ -67,12 +52,16 @@ public class MessageController {
             if (candidat != null && candidat.getCandidatures() != null) {
                 modelAndView.addObject("candidat", candidat);
                 modelAndView.addObject("isCandidat", true);
-                // Pour chaque candidature, récupérer les messages associés
+                
+                // Créer les listes distinctes pour chaque candidature
                 for (Candidature candidature : candidat.getCandidatures()) {
-                    List<MessageOffre> receivedMessages = messageService.findOffreMessagesByCandidature(candidature);
-                    List<MessageCandidature> sentMessages = messageService.findCandidatureMessagesByCandidature(candidature);
-                    modelAndView.addObject("receivedMessages_" + candidature.getIdCandidature(), receivedMessages);
-                    modelAndView.addObject("sentMessages_" + candidature.getIdCandidature(), sentMessages);
+                    int idCandidature = candidature.getIdCandidature();
+                    // Messages reçus = MessageOffre
+                    modelAndView.addObject("receivedMessages_" + idCandidature, 
+                            messageService.findOffreMessagesByCandidature(candidature));
+                    // Messages envoyés = MessageCandidature
+                    modelAndView.addObject("sentMessages_" + idCandidature, 
+                            messageService.findCandidatureMessagesByCandidature(candidature));
                 }
             }
         } else if ("entreprise".equals(userType)) {
@@ -80,12 +69,16 @@ public class MessageController {
             if (entreprise != null && entreprise.getOffreEmplois() != null) {
                 modelAndView.addObject("entreprise", entreprise);
                 modelAndView.addObject("isEntreprise", true);
-                // Pour chaque offre, récupérer les messages associés
+                
+                // Créer les listes distinctes pour chaque offre
                 for (OffreEmploi offre : entreprise.getOffreEmplois()) {
-                    List<MessageCandidature> receivedMessages = messageService.findCandidatureMessagesByOffreEmploi(offre);
-                    List<MessageOffre> sentMessages = messageService.findOffreMessagesByOffreEmploi(offre);
-                    modelAndView.addObject("receivedMessages_" + offre.getIdOffreEmploi(), receivedMessages);
-                    modelAndView.addObject("sentMessages_" + offre.getIdOffreEmploi(), sentMessages);
+                    int idOffre = offre.getIdOffreEmploi();
+                    // Messages reçus = MessageCandidature
+                    modelAndView.addObject("receivedMessages_" + idOffre, 
+                            messageService.findCandidatureMessagesByOffreEmploi(offre));
+                    // Messages envoyés = MessageOffre
+                    modelAndView.addObject("sentMessages_" + idOffre, 
+                            messageService.findOffreMessagesByOffreEmploi(offre));
                 }
             }
         } else {
@@ -236,6 +229,7 @@ public class MessageController {
         
         return new ModelAndView("redirect:/error/403");
     }
+
     
     /**
      * Traiter l'envoi d'un message à propos d'une candidature
@@ -280,6 +274,7 @@ public class MessageController {
         
         return new ModelAndView("redirect:/error/403");
     }
+
     
     /**
      * Voir les détails d'un message d'une candidature
@@ -349,6 +344,7 @@ public class MessageController {
         return modelAndView;
     }
 
+
     /**
      * Affiche le formulaire pour répondre à un message
      */
@@ -376,6 +372,8 @@ public class MessageController {
         
         return modelAndView;
     }
+
+    
     /**
      * Traiter l'envoi d'une réponse à un message existant
      */
@@ -417,4 +415,5 @@ public class MessageController {
         
         return new ModelAndView("redirect:/error/403");
     }
+
 }

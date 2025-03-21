@@ -2,18 +2,17 @@ package fr.atlantique.imt.inf211.jobmngt.service;
 
 import fr.atlantique.imt.inf211.jobmngt.dao.MessageCandidatureDao;
 import fr.atlantique.imt.inf211.jobmngt.dao.MessageOffreDao;
-import fr.atlantique.imt.inf211.jobmngt.dao.CandidatureDao;
-import fr.atlantique.imt.inf211.jobmngt.dao.OffreEmploiDao;
 import fr.atlantique.imt.inf211.jobmngt.entity.*;
-import fr.atlantique.imt.inf211.jobmngt.dto.common.MessageDTO;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class MessageServiceImpl implements MessageService {
@@ -25,18 +24,13 @@ public class MessageServiceImpl implements MessageService {
     private MessageOffreDao messageOffreDao;
     
     @Autowired
-    private CandidatureDao candidatureDao;
-    
-    @Autowired
-    private OffreEmploiDao offreEmploiDao;
-
-    @Autowired
     private OffreEmploiService offreEmploiService;
-
+    
     @Autowired
     private CandidatureService candidatureService;
     
     @Override
+    @Transactional
     public MessageCandidature sendMessageToCandidature(Candidature candidature, OffreEmploi offreEmploi, String message) {
         MessageCandidature messageCandidature = new MessageCandidature();
         messageCandidature.setCandidature(candidature);
@@ -59,21 +53,15 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
-    public int sendNotificationsForApplication(Candidature candidature) {
+    @Transactional
+    public int sendNotificationsForApplication(Candidature candidature, String customMessage) {
         int count = 0;
         // Trouver toutes les offres qui correspondent à cette candidature
-        List<OffreEmploi> matchingJobs = offreEmploiDao.findMatchingCandidature(candidature);
+        List<OffreEmploi> matchingJobs = offreEmploiService.getMatchingOffres(candidature);
         
         // Pour chaque offre correspondante, envoyer une notification
         for (OffreEmploi job : matchingJobs) {
-            String message = "Une nouvelle candidature correspondant à votre offre a été publiée. " +
-                     "Candidature ID: " + candidature.getIdCandidature() +
-                     ", Profil: " + candidature.getQualificationLevel().getLabelQualification() +
-                     ", Secteurs: " + candidature.getSectors().stream()
-                                      .map(Sector::getLabelSecteur)
-                                      .collect(Collectors.joining(", "));
-                                      
-            sendMessageToCandidature(candidature, job, message);
+            sendMessageToCandidature(candidature, job, customMessage);
             count++;
         }
         
@@ -81,6 +69,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @Transactional
     public MessageOffre sendMessageToOffre(OffreEmploi offreEmploi, Candidature candidature, String message) {
         MessageOffre messageOffre = new MessageOffre();
         messageOffre.setOffreEmploi(offreEmploi);
@@ -103,19 +92,15 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
-    public int sendNotificationsForJob(OffreEmploi offreEmploi) {
+    @Transactional
+    public int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage) {
         int count = 0;
         // Trouver toutes les candidatures qui correspondent à cette offre
-        List<Candidature> matchingCandidatures = candidatureDao.findMatchingOffreEmploi(offreEmploi);
+        List<Candidature> matchingCandidatures = candidatureService.getMatchingCandidatures(offreEmploi);
         
         // Pour chaque candidature correspondante, envoyer une notification
         for (Candidature candidature : matchingCandidatures) {
-            String message = "Une nouvelle offre d'emploi correspondant à votre profil a été publiée. " +
-                     "Offre ID: " + offreEmploi.getIdOffreEmploi() +
-                     ", Titre: " + offreEmploi.getTitle() +
-                     ", Entreprise: " + offreEmploi.getEntreprise().getDenomination();
-                     
-            sendMessageToOffre(offreEmploi, candidature, message);
+            sendMessageToOffre(offreEmploi, candidature, customMessage);
             count++;
         }
         
@@ -123,45 +108,51 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
-    public List<MessageDTO> getAllMessagesForCandidature(Candidature candidature) {
-        List<MessageDTO> allMessages = new ArrayList<>();
+    public List<Object> getAllMessagesForCandidature(Candidature candidature) {
+        List<Object> allMessages = new ArrayList<>();
         
         // Ajouter les messages envoyés par le candidat (MessageCandidature)
         List<MessageCandidature> sentMessages = findCandidatureMessagesByCandidature(candidature);
-        for (MessageCandidature message : sentMessages) {
-            allMessages.add(MessageDTO.fromMessageCandidature(message));
-        }
+        allMessages.addAll(sentMessages);
         
         // Ajouter les messages reçus par le candidat (MessageOffre)
         List<MessageOffre> receivedMessages = findOffreMessagesByCandidature(candidature);
-        for (MessageOffre message : receivedMessages) {
-            allMessages.add(MessageDTO.fromMessageOffre(message));
-        }
+        allMessages.addAll(receivedMessages);
         
         // Trier par date, du plus récent au plus ancien
-        allMessages.sort((m1, m2) -> m2.getPublicationDate().compareTo(m1.getPublicationDate()));
+        Collections.sort(allMessages, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                Date date1 = getPublicationDate(o1);
+                Date date2 = getPublicationDate(o2);
+                return date2.compareTo(date1);
+            }
+        });
         
         return allMessages;
     }
     
     @Override
-    public List<MessageDTO> getAllMessagesForOffreEmploi(OffreEmploi offreEmploi) {
-        List<MessageDTO> allMessages = new ArrayList<>();
+    public List<Object> getAllMessagesForOffreEmploi(OffreEmploi offreEmploi) {
+        List<Object> allMessages = new ArrayList<>();
         
         // Ajouter les messages envoyés par l'entreprise (MessageOffre)
         List<MessageOffre> sentMessages = findOffreMessagesByOffreEmploi(offreEmploi);
-        for (MessageOffre message : sentMessages) {
-            allMessages.add(MessageDTO.fromMessageOffre(message));
-        }
+        allMessages.addAll(sentMessages);
         
         // Ajouter les messages reçus par l'entreprise (MessageCandidature)
         List<MessageCandidature> receivedMessages = findCandidatureMessagesByOffreEmploi(offreEmploi);
-        for (MessageCandidature message : receivedMessages) {
-            allMessages.add(MessageDTO.fromMessageCandidature(message));
-        }
+        allMessages.addAll(receivedMessages);
         
         // Trier par date, du plus récent au plus ancien
-        allMessages.sort((m1, m2) -> m2.getPublicationDate().compareTo(m1.getPublicationDate()));
+        Collections.sort(allMessages, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                Date date1 = getPublicationDate(o1);
+                Date date2 = getPublicationDate(o2);
+                return date2.compareTo(date1);
+            }
+        });
         
         return allMessages;
     }
@@ -175,36 +166,14 @@ public class MessageServiceImpl implements MessageService {
     public MessageOffre getMessageOffreById(int id) {
         return messageOffreDao.findById(id);
     }
-
-    // Dans MessageServiceImpl.java
-    @Override
-    public int sendNotificationsForApplication(Candidature candidature, String customMessage) {
-        int count = 0;
-        // Trouver toutes les offres qui correspondent à cette candidature
-        List<OffreEmploi> matchingJobs = offreEmploiService.getMatchingOffres(candidature);
-        
-        // Pour chaque offre correspondante, envoyer une notification
-        for (OffreEmploi job : matchingJobs) {
-            MessageCandidature messageCandidature = sendMessageToCandidature(candidature, job, customMessage);
-            count++;
+    
+    // Méthode utilitaire pour récupérer la date de publication d'un message
+    private Date getPublicationDate(Object messageObject) {
+        if (messageObject instanceof MessageCandidature) {
+            return ((MessageCandidature) messageObject).getPublicationDate();
+        } else if (messageObject instanceof MessageOffre) {
+            return ((MessageOffre) messageObject).getPublicationDate();
         }
-        
-        return count;
+        return new Date(0); // Date par défaut si le type n'est pas reconnu
     }
-
-    @Override
-    public int sendNotificationsForJob(OffreEmploi offreEmploi, String customMessage) {
-        int count = 0;
-        // Trouver toutes les candidatures qui correspondent à cette offre
-        List<Candidature> matchingCandidatures = candidatureService.getMatchingCandidatures(offreEmploi);
-        
-        // Pour chaque candidature correspondante, envoyer une notification
-        for (Candidature candidature : matchingCandidatures) {
-            MessageOffre messageOffre = sendMessageToOffre(offreEmploi, candidature, customMessage);
-            count++;
-        }
-        
-        return count;
-    }
-
 }
