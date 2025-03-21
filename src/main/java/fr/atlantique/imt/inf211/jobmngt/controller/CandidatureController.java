@@ -106,12 +106,12 @@ public class CandidatureController {
         application.setAppDate(new Date());
         
         // Si un ID d'offre d'emploi est fourni, récupérer l'offre
-        if (jobId != null) {
-            OffreEmploi job = offreEmploiService.getOffreById(jobId);
-            if (job != null) {
-                modelAndView.addObject("job", job);
-            }
-        }
+        // if (jobId != null) {
+        //     OffreEmploi job = offreEmploiService.getOffreById(jobId);
+        //     if (job != null) {
+        //         modelAndView.addObject("job", job);
+        //     }
+        // }
         
         modelAndView.addObject("app", application);
         modelAndView.addObject("qualificationLevels", qualificationLevelService.listOfQualificationLevels());

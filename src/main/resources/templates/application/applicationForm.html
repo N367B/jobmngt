@@ -5,7 +5,7 @@
         <h2 th:text="${action == 'create' ? 'Submit new application' : 'Edit application'}">Application Form</h2>
     </header>
     
-    <div th:if="${job != null}" class="alert alert-info mb-4">
+    <!-- <div th:if="${job != null}" class="alert alert-info mb-4">
         <h3>Applying for: <span th:text="${job.title}">Job Title</span></h3>
         <p>
             <strong>Company:</strong> <span th:text="${job.entreprise.denomination}">Company Name</span>
@@ -13,7 +13,7 @@
         <p>
             <strong>Required qualification:</strong> <span th:text="${job.qualificationLevel.labelQualification}">Qualification</span>
         </p>
-    </div>
+    </div> -->
     
     <form th:action="@{''}" method="post" class="card" onsubmit="return validateForm()">
         <div class="card-body">
